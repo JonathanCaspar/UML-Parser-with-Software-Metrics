@@ -1,5 +1,15 @@
 package com.parseur.main;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.Charset;
+import java.awt.event.*;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
+
 import java.awt.Dimension;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -24,20 +34,64 @@ public class Parseur extends JPanel {
 	public JScrollPane relationsBox;
 	public JScrollPane detailsBox;
 	
+	public File file;
+	
 	public Parseur() {
 		loadFileButton = createButton("Charger fichier");
 		fileName = createTextArea("");
 		classBox = createBox("Classes");
 		attributeBox = createBox("Attributs");
-		methodBox = createBox("Méthodes");
+		methodBox = createBox("MÃ©thodes");
 		subClassBox = createBox("Sous-classes");
-		relationsBox = createBox("Relations/Agrégations");
+		relationsBox = createBox("Relations/AgrÃ©gations");
+		
+		loadFileButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				file = searchFile();
+				if(file != null){
+					fileName.setText(file.getName());
+
+					try{
+				    	String fileStrings = readFile(file.toPath().toString(),Charset.forName("UTF-8"));
+
+				    	//System.out.println(fileStrings);
+
+				    	//decouper avec ; (classe, generalisation, relations)
+				    	String[] tab = fileStrings.split(";");
+
+				    	for (int i=0; i<tab.length; i++) {
+				    		System.out.println(tab[i]);
+				    	}
+
+				    } catch(IOException ex){
+				    	System.out.println("Could not read file");
+				    }
+				} else {
+					System.out.println("File access cancelled by user.");
+				}
+			}
+		});
+	}
+	
+	//met le fichier dans un String
+	public String readFile(String path, Charset encoding) throws IOException {
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
+	}
+	
+	//cherche un fichier dans l'odinateur
+	public File searchFile() {
+		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+
+		int returnVal = jfc.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {return jfc.getSelectedFile();} 
+		else {return null;}
 	}
 	
 	
-	// Ajoute une fenêtre interne
+	// Ajoute une fenÃªtre interne
 	public JScrollPane createBox(String title) {
-		String[] data = new String[]{}; //si aucune donnée : fenêtre vide
+		String[] data = new String[]{}; //si aucune donnÃ©e : fenÃªtre vide
 		
 		JList<String> list = new JList<String>(data);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -46,7 +100,7 @@ public class Parseur extends JPanel {
         JScrollPane listScroller = new JScrollPane(list);
         listScroller.setPreferredSize(new Dimension(250, 80));
         
-		// Ajout à la fenêtre principale
+		// Ajout Ã  la fenÃªtre principale
 		add(new JLabel(title));
 		add(listScroller);
 		
@@ -60,7 +114,7 @@ public class Parseur extends JPanel {
 		return button;
 	}
 	
-	// Ajoute une zone de texte interne non-sélectionnable
+	// Ajoute une zone de texte interne non-sÃ©lectionnable
 	public JTextArea createTextArea(String text) {
 		JTextArea area = new JTextArea(text);
 		area.setEnabled(false);
