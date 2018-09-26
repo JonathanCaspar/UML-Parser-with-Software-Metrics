@@ -54,14 +54,14 @@ public class Parseur extends JPanel {
 					try{
 				    	String fileStrings = readFile(file.toPath().toString(),Charset.forName("UTF-8"));
 
-				    	//System.out.println(fileStrings);
-
 				    	//decouper avec ; (classe, generalisation, relations)
 				    	String[] tab = fileStrings.split(";");
 
-				    	for (int i=0; i<tab.length; i++) {
-				    		System.out.println(tab[i]);
+				    	do{
+						fileStrings = decoupeClass(fileStrings, tab);//decortiquer les classes
 				    	}
+				    	while(fileStrings.contains("ATTRIBUTES"));//jusqu'à avoir passé toutes les classes
+
 
 				    } catch(IOException ex){
 				    	System.out.println("Could not read file");
@@ -72,6 +72,81 @@ public class Parseur extends JPanel {
 			}
 		});
 	}
+	
+	
+	//decoupe les classes
+	public String decoupeClass(String fileStrings, String[] tab){
+		//CLASS
+		int i1Class = tab[0].indexOf("CLASS") + 6;
+		int i2Class = tab[0].indexOf("ATTRIBUTES") - 1;
+		String className = tab[0].substring(i1Class,i2Class);
+
+
+		//ATTRIBUTES
+		int i1Att = tab[0].indexOf("ATTRIBUTES") + 10;
+		int i2Att = tab[0].indexOf("OPERATIONS") - 1;
+		String allAttributes = tab[0].substring(i1Att,i2Att);
+
+		//nb d'attributs
+		int nbA = count(allAttributes, "," ) +1; //compte le nb de virgule
+		
+		//tableau de tout les attributs de la class
+		String[] tabAttributs = new String[nbA];
+
+		//si plusieurs attributs
+		if(nbA>1){
+			String[] t = allAttributes.split(",");
+			for (int i=0; i<t.length; i++) {
+				tabAttributs[i] = t[i].trim();
+			}
+		} else if(nbA == 1){
+			tabAttributs[0] = allAttributes.trim();
+		}
+
+
+		//OPERATIONS
+		int i1Ope = tab[0].indexOf("OPERATIONS") + 10;
+		int i2Ope = tab[0].length();
+		String allOperations = tab[0].substring(i1Ope,i2Ope);
+
+		//nb d'opeartions
+		int nbO = count(allOperations, "," ) +1; //compte le nb de virgule
+
+		//tableau de toutes les operations de la class
+		String[] tabOperations = new String[nbO];
+
+		//si plusieurs opérations
+		if(nbO>1){
+			String[] t2 = allOperations.split(",");
+			for (int i=0; i<t2.length; i++) {
+				tabOperations[i] = t2[i].trim();
+			}
+		} else if(nbO == 1){
+			tabOperations[0] = allOperations.trim();
+		}
+
+
+		//creer une nouvelle classe avec la liste d'attributs correspondants
+		Classe classe = new Classe(className, tabAttributs, tabOperations);
+
+		//supprimer chaines deja faites
+		return fileStrings.substring(tab[0].length(),fileStrings.length());
+	}
+
+	//compte le nombre de l dans str
+	public int count(String str, String l){
+		if (str.isEmpty() || l.isEmpty()) {
+			return 0;
+		}
+		int count = 0;
+		int idx = 0;
+		while ((idx = str.indexOf(l, idx)) != -1) {
+			count++;
+			idx += l.length();
+		}
+		return count;
+	}
+	
 	
 	//met le fichier dans un String
 	public String readFile(String path, Charset encoding) throws IOException {
