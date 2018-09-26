@@ -36,6 +36,8 @@ public class Parseur extends JPanel {
 	
 	public File file;
 	
+	public String fileStrings;
+	
 	public Parseur() {
 		loadFileButton = createButton("Charger fichier");
 		fileName = createTextArea("");
@@ -52,15 +54,17 @@ public class Parseur extends JPanel {
 					fileName.setText(file.getName());
 
 					try{
-				    	String fileStrings = readFile(file.toPath().toString(),Charset.forName("UTF-8"));
+				    	fileStrings = readFile(file.toPath().toString(),Charset.forName("UTF-8"));
 
 				    	//decouper avec ; (classe, generalisation, relations)
 				    	String[] tab = fileStrings.split(";");
 
+				    	int j=0;
 				    	do{
-						fileStrings = decoupeClass(fileStrings, tab);//decortiquer les classes
+						decoupeClass(fileStrings, tab,j);//decortiquer les classes
+						j++;
 				    	}
-				    	while(fileStrings.contains("ATTRIBUTES"));//jusqu'à avoir passé toutes les classes
+				    	while(tab[j].contains("ATTRIBUTES"));//jusqu'à avoir passé toutes les classes
 
 
 				    } catch(IOException ex){
@@ -75,53 +79,53 @@ public class Parseur extends JPanel {
 	
 	
 	//decoupe les classes
-	public String decoupeClass(String fileStrings, String[] tab){
+	public void decoupeClass(String fileStrings, String[] tab, int j){
 		//CLASS
-		int i1Class = tab[0].indexOf("CLASS") + 6;
-		int i2Class = tab[0].indexOf("ATTRIBUTES") - 1;
-		String className = tab[0].substring(i1Class,i2Class);
+		int i1Class = tab[j].indexOf("CLASS") + 6;
+		int i2Class = tab[j].indexOf("ATTRIBUTES") - 1;
+		String className = tab[j].substring(i1Class,i2Class);
 
 
 		//ATTRIBUTES
-		int i1Att = tab[0].indexOf("ATTRIBUTES") + 10;
-		int i2Att = tab[0].indexOf("OPERATIONS") - 1;
-		String allAttributes = tab[0].substring(i1Att,i2Att);
+		int i1Att = tab[j].indexOf("ATTRIBUTES") + 10;
+		int i2Att = tab[j].indexOf("OPERATIONS") - 1;
+		String allAttributes = tab[j].substring(i1Att,i2Att);
 
-		//nb d'attributs
-		int nbA = count(allAttributes, "," ) +1; //compte le nb de virgule
+		//nb de virgule
+		int nbA = count(allAttributes, "," );
 		
 		//tableau de tout les attributs de la class
-		String[] tabAttributs = new String[nbA];
+		String[] tabAttributs = new String[nbA+1];
 
 		//si plusieurs attributs
-		if(nbA>1){
+		if(nbA>0){
 			String[] t = allAttributes.split(",");
 			for (int i=0; i<t.length; i++) {
 				tabAttributs[i] = t[i].trim();
 			}
-		} else if(nbA == 1){
+		} else if(nbA == 0){//soit 0 ou 1 attribut
 			tabAttributs[0] = allAttributes.trim();
 		}
 
 
 		//OPERATIONS
-		int i1Ope = tab[0].indexOf("OPERATIONS") + 10;
-		int i2Ope = tab[0].length();
-		String allOperations = tab[0].substring(i1Ope,i2Ope);
+		int i1Ope = tab[j].indexOf("OPERATIONS") + 10;
+		int i2Ope = tab[j].length();
+		String allOperations = tab[j].substring(i1Ope,i2Ope);
 
 		//nb d'opeartions
-		int nbO = count(allOperations, "," ) +1; //compte le nb de virgule
+		int nbO = count(allOperations, "," ); //compte le nb de virgule
 
 		//tableau de toutes les operations de la class
-		String[] tabOperations = new String[nbO];
+		String[] tabOperations = new String[nbO+1];
 
 		//si plusieurs opérations
-		if(nbO>1){
+		if(nbO>0){
 			String[] t2 = allOperations.split(",");
 			for (int i=0; i<t2.length; i++) {
 				tabOperations[i] = t2[i].trim();
 			}
-		} else if(nbO == 1){
+		} else if(nbO == 0){//soit 0 ou 1 attribut
 			tabOperations[0] = allOperations.trim();
 		}
 
@@ -130,7 +134,7 @@ public class Parseur extends JPanel {
 		Classe classe = new Classe(className, tabAttributs, tabOperations);
 
 		//supprimer chaines deja faites
-		return fileStrings.substring(tab[0].length(),fileStrings.length());
+		fileStrings = fileStrings.substring(tab[0].length(),fileStrings.length());
 	}
 
 	//compte le nombre de l dans str
