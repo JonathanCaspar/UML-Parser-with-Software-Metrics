@@ -115,23 +115,19 @@ public class Parseur extends JPanel {
 		Matcher matcherAggregation = patternAggregation.matcher(instruction);
 		
 		if (matcherClass.find()) {
-			System.out.println("matcherclass group 0 : "+ matcherClass.group(0));
 			database.addClass(matcherClass.group(0));
 			return;
 		}
 		
 		if (matcherGeneralization.find()) {
-			System.out.println("UNE GENERALISATION TROUVEE !");
 			return;
 		}
 		
 		if (matcherRelation.find()) {
-			System.out.println("UNE RELATION TROUVEE !");
 			return;
 		}
 		
 		if (matcherAggregation.find()) {
-			System.out.println("UNE AGGREGATION TROUVEE !");
 			return;
 		}
 		return;

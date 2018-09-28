@@ -13,9 +13,11 @@ public class Database {
 	
 	public void addClass(String instruction) {
 		Pattern attrPattern   = Pattern.compile("(?<=ATTRIBUTES)[\\w|\\s|\\:|\\,]+(?=OPERATIONS)");
-		Pattern methodPattern = Pattern.compile("(?<=OPERATIONS)[\\w|\\s|\\:|\\,|\\(|\\)]+");
+		Pattern operationPattern = Pattern.compile("(?<=OPERATIONS)[\\w|\\s|\\:|\\,|\\(|\\)]+");
+		Pattern methodPattern = Pattern.compile("([\\w]+)(?:\\s*\\()([\\w\\:\\s\\,]*)(?:\\)\\s+\\:\\s+)([\\w]+)");
 		Matcher attrMatcher   = attrPattern.matcher(instruction);
-		Matcher methodMatcher   = attrPattern.matcher(instruction);
+		Matcher operationMatcher   = operationPattern.matcher(instruction);
+
 		String[] newClass = new String[6];
 		
 		//Parsing du nom de la classe
@@ -32,16 +34,37 @@ public class Database {
 				// On affecte chaque attribut étant sous la forme "<nom> : <type>" dans la partie 
 				// attributs de "newClass" sous une nouvelle forme : "<type> <nom>,"
 				String[] attribut = attrList[i].trim().split("\\:");
-				formattedAttributes += (attribut[1].trim()+ " " + attribut[0].trim() + (i==attrList.length-1 ? "":",") );
+				formattedAttributes += (attribut[1].trim()+ " " + attribut[0].trim() + (i==attrList.length-1 ? "":";") );
 			}
 			newClass[1] = formattedAttributes;
 		}
 		
-		//Parsing des méthodes
-		if(methodMatcher.find()) {
+		//Parsing de l'ensemble des méthodes
+		if(operationMatcher.find()) {
 			// On récupére les méthodes dans un tableau 
-			String[] attrList = instruction.substring(attrMatcher.start(), attrMatcher.end()).split("\\,");
-			//newClass[2] = formattedMethods;
+			String rawMethods = instruction.substring(operationMatcher.start(), operationMatcher.end());
+			Matcher methodMatcher   = methodPattern.matcher(rawMethods);
+			String formattedMethods = "";
+			
+			// On parse chaque méthode <nom>(<parametres>): <type>
+			while(methodMatcher.find()) {
+				String[] parameters = methodMatcher.group(2).split("\\,");
+				String type = methodMatcher.group(3); // type de retour de la méthode
+				formattedMethods += ( (type.equals("void")? "": type + " ") + methodMatcher.group(1) + "("); // <type> <nom de methode>
+				
+				//On traite les parametres multiples de la méthode
+				int count = parameters.length;
+				if (count != 0) {
+					for(int i = 0; i < count; i++) {
+						String[] splitParams = parameters[i].split("\\:");
+						if (splitParams.length == 2) {
+							formattedMethods += splitParams[1].trim(); // on prend uniquement le type du parametre
+						}
+						formattedMethods += (i != count-1)? ", ": ")";
+					}
+				}
+			}
+			newClass[2] = formattedMethods;
 		}
 		
 		// Une fois le nom, les attributs et les méthodes ajoutées, on ajoute la Classe dans notre ArrayList classes
