@@ -2,6 +2,7 @@ package com.parseur.main;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.nio.charset.Charset;
@@ -14,6 +15,7 @@ import javax.swing.filechooser.FileSystemView;
 
 import java.awt.Dimension;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,7 +23,11 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 
 public class Parseur extends JPanel {
@@ -34,7 +40,7 @@ public class Parseur extends JPanel {
 	public JScrollPane methodBox;
 	public JScrollPane subClassBox;
 	public JScrollPane relationsBox;
-	public JScrollPane detailsBox;
+	public JTextArea detailsBox;
 	
 	public Database database;
 	public File file;
@@ -49,6 +55,7 @@ public class Parseur extends JPanel {
 		methodBox = createBox("Méthodes");
 		subClassBox = createBox("Sous-classes");
 		relationsBox = createBox("Relations/Agrégations");
+		detailsBox = createTextArea("Détails");
 		
 		database = new Database();
 		
@@ -70,6 +77,7 @@ public class Parseur extends JPanel {
 				    	}
 				    	database.showDBcontent();
 				    	updateClasses(database);
+				    	enableClassListener();
 
 				    } catch(IOException ex){
 				    	System.out.println("Could not read file");
@@ -82,8 +90,29 @@ public class Parseur extends JPanel {
 	}
 	
 	public void updateClasses(Database database) {
-		String[] classes = database.getClasses();
-		changeBoxData(classBox, classes);
+		DefaultListModel<Classe> listModel = database.getClasses();
+		JList<Classe> classesJList = new JList<Classe>(listModel);
+		classBox.setViewportView(classesJList);
+	}
+	
+	public void enableClassListener() {
+		JViewport viewport = classBox.getViewport(); 
+		JList classList = (JList) viewport.getView(); 
+		classList.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				JList list = (JList) e.getSource();
+				Classe selectedClass = (Classe) list.getSelectedValue();	
+				
+				DefaultListModel<StringDetail> attrListModel = selectedClass.getAttributes(); // crée un modèle de liste d'objets StringDetail 
+				JList<StringDetail> attributesJList = new JList<StringDetail>(attrListModel); // crée une JList contenant les objets StringDetail (ici : attributs)
+				
+				detailsBox.setText(selectedClass.getName().getDetail()); // détails de Classe
+				attributeBox.setViewportView(attributesJList); //
+				
+			}
+		});
 	}
 	
 	//met le fichier dans un String
@@ -167,10 +196,17 @@ public class Parseur extends JPanel {
 	}
 	
 	// Modifie le contenu d'une liste
-	public void changeBoxData(JScrollPane list, String[] newData) {
+	public void changeBoxData(JScrollPane pane, ArrayList<StringDetail> newData) {
 		if (newData == null) return;
-		JList<String> newList = new JList<String>(newData);
-		list.setViewportView(newList);
+		String[] value = new String[newData.size()];
+		String[] details = new String[newData.size()];
+		
+		for (int i = 0; i < newData.size(); i++) {
+			value[i]   = newData.get(i).getValue();
+			details[i] = newData.get(i).getDetail();
+		}
+		JList<String> newList = new JList<String>(value);
+		pane.setViewportView(newList);
 	}
 	
 	public void runAndShowGUI() {
@@ -178,8 +214,6 @@ public class Parseur extends JPanel {
         frame = new JFrame("Extracteur UML");
         frame.setSize(400, 400);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        
-        changeBoxData(methodBox, new String[] {"tesr","ujbgyfy"});
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(this);
         frame.setVisible(true);

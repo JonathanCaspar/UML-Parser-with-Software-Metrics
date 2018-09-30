@@ -4,30 +4,35 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.DefaultListModel;
+
 public class Database {
-	private ArrayList<String[]> classes; 
+	private ArrayList<Classe> classes; 
 
 	public Database() {
-		classes = new ArrayList<String[]>();
+		classes = new ArrayList<Classe>();
 	}
 	
 	public void addClass(String instruction) {
-		Pattern attrPattern   = Pattern.compile("(?<=ATTRIBUTES)[\\w|\\s|\\:|\\,]+(?=OPERATIONS)");
+		Pattern attrPattern   = Pattern.compile("(ATTRIBUTES)[\\w|\\s|\\:|\\,]+(?=OPERATIONS)");
 		Pattern operationPattern = Pattern.compile("(?<=OPERATIONS)[\\w|\\s|\\:|\\,|\\(|\\)]+");
 		Pattern methodPattern = Pattern.compile("([\\w]+)(?:\\s*\\()([\\w\\:\\s\\,]*)(?:\\)\\s+\\:\\s+)([\\w]+)");
 		Matcher attrMatcher   = attrPattern.matcher(instruction);
 		Matcher operationMatcher   = operationPattern.matcher(instruction);
 
-		String[] newClass = new String[6];
+		Classe newClass = new Classe();
 		
 		//Parsing du nom de la classe
 		String[] words = instruction.split("\\s+");
-		newClass[0] = words[1]; //Nom de classe
+		newClass.setName(words[1], instruction); //Nom de classe + description BNF
 		
 		//Parsing des attributs
 		if(attrMatcher.find()) {
 			// On récupére les attributs dans un tableau 
-			String[] attrList = instruction.substring(attrMatcher.start(), attrMatcher.end()).split("\\,");
+			String rawAttributes = instruction.substring(attrMatcher.start(), attrMatcher.end()).trim();
+			String attributes = rawAttributes.substring(11, rawAttributes.length()).trim(); // on retire le mot "OPERATIONS"
+			
+			String[] attrList = attributes.split("\\,");
 			String formattedAttributes = "";
 			
 			for(int i = 0; i < attrList.length; i++) {
@@ -36,7 +41,7 @@ public class Database {
 				String[] attribut = attrList[i].trim().split("\\:");
 				formattedAttributes += (attribut[1].trim()+ " " + attribut[0].trim() + (i==attrList.length-1 ? "":";") );
 			}
-			newClass[1] = formattedAttributes;
+			newClass.setAttributes(formattedAttributes, rawAttributes);
 		}
 		
 		//Parsing de l'ensemble des méthodes
@@ -60,11 +65,17 @@ public class Database {
 						if (splitParams.length == 2) {
 							formattedMethods += splitParams[1].trim(); // on prend uniquement le type du parametre
 						}
-						formattedMethods += (i != count-1)? ", ": ")";
+						formattedMethods += (i != count-1)? ", ": ");"; 
 					}
+					
 				}
+				
 			}
-			newClass[2] = formattedMethods;
+			if (!formattedMethods.isEmpty()) {
+				formattedMethods = formattedMethods.substring(0, formattedMethods.length()-1); // retrait du ";"
+			}
+			
+			newClass.setMethods(formattedMethods, "test");
 		}
 		
 		// Une fois le nom, les attributs et les méthodes ajoutées, on ajoute la Classe dans notre ArrayList classes
@@ -83,20 +94,21 @@ public class Database {
 		// to do
 	}
 	
-	public String[] getClasses() {
-		String[] classesList= new String[classes.size()];
+	// Retourne une ArrayList d'objet StringDetail détaillant le nom des classes
+    public DefaultListModel<Classe> getClasses() {
+    	DefaultListModel<Classe> listModel = new DefaultListModel();
 		for(int i = 0; i < classes.size(); i++) {
-			classesList[i] = classes.get(i)[0];
+			listModel.addElement(classes.get(i));
 		}
-		return classesList;
+		return listModel;
 	}
 	
 	public void showDBcontent() {
 		for(int i = 0; i < classes.size(); i++) {
-			String[] selectedClass = classes.get(i);
-			System.out.println("Classe: " + selectedClass[0]);
-			System.out.println("Attributs: " + selectedClass[1]);
-			System.out.println("Methodes: " + selectedClass[2]);
+			Classe selectedClass = classes.get(i);
+			System.out.println("Classe: " + selectedClass.getName());
+			System.out.println("Attributs: " + selectedClass.getAttributes());
+			System.out.println("Methodes: " + selectedClass.getMethods());
 			System.out.println("--------------------------------------");
 		}
 	}
