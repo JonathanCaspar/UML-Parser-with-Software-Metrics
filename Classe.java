@@ -29,6 +29,21 @@ public class Classe {
 		methods.set(value, detail);
 	}
 	
+	public void setSubClasses(String value, String detail) {
+		subClass.set(value, detail);
+	}
+	
+	public void addRelation(String value, String detail) {
+		String oldValue = relations.getValue();
+		String oldDetail = relations.getDetail();
+		
+		if (!oldValue.isEmpty()) {
+			 oldValue += ";";
+			 oldDetail += ";";
+		}
+		relations.set(oldValue + value, oldDetail + detail);
+	}
+	
 	public StringDetail getName() { return nom; }
 	
 	public DefaultListModel<StringDetail> getAttributes() { 
@@ -41,7 +56,37 @@ public class Classe {
 		return listModel; 
 	}
 	
-	public StringDetail getMethods() { return methods; }
+	public DefaultListModel<StringDetail> getMethods() { 
+		DefaultListModel<StringDetail> listModel = new DefaultListModel();
+		String[] splitMethods = methods.getValue().split("\\;");
+		
+		for(int i = 0; i < splitMethods.length; i++) {
+			listModel.addElement(new StringDetail(splitMethods[i], methods.getDetail()));
+		}
+		return listModel; 
+	}
+	
+	public DefaultListModel<StringDetail> getSubClasses() { 
+		DefaultListModel<StringDetail> listModel = new DefaultListModel();
+		String[] splitSubClasses = subClass.getValue().split("\\;");
+		
+		for(int i = 0; i < splitSubClasses.length; i++) {
+			listModel.addElement(new StringDetail(splitSubClasses[i], subClass.getDetail()));
+		}
+		return listModel; 
+	}
+	
+	public DefaultListModel<StringDetail> getRelations() { 
+		DefaultListModel<StringDetail> listModel = new DefaultListModel();
+		String[] splitRelationsValue = relations.getValue().split("\\;");
+		String[] splitRelationsDetail = relations.getDetail().split("\\;");
+		
+		for(int i = 0; i < splitRelationsValue.length; i++) {
+			listModel.addElement(new StringDetail(splitRelationsValue[i], splitRelationsDetail[i]));
+		}
+		return listModel; 
+	}
+	
 	
 	public String toString() {
 		return this.nom.getValue();

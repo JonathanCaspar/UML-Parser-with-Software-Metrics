@@ -14,12 +14,15 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileSystemView;
 
 import java.awt.Dimension;
+
+import javax.naming.spi.DirStateFactory.Result;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -66,6 +69,7 @@ public class Parseur extends JPanel {
 					fileName.setText(file.getName());
 
 					try{
+						database.resetDB();
 				    	fileStrings = readFile(file.toPath().toString(),Charset.forName("UTF-8"));
 
 				    	//decouper avec ; (classe, generalisation, relations)
@@ -104,12 +108,26 @@ public class Parseur extends JPanel {
 			public void valueChanged(ListSelectionEvent e) {
 				JList list = (JList) e.getSource();
 				Classe selectedClass = (Classe) list.getSelectedValue();	
+				DefaultListModel<StringDetail> listModel;
+				JList<StringDetail> attributesJList;
+				JList<StringDetail> methodsJList;
+				JList<StringDetail> subClassesJList;
+				JList<StringDetail> relationsJList;
 				
-				DefaultListModel<StringDetail> attrListModel = selectedClass.getAttributes(); // crée un modèle de liste d'objets StringDetail 
-				JList<StringDetail> attributesJList = new JList<StringDetail>(attrListModel); // crée une JList contenant les objets StringDetail (ici : attributs)
+				listModel = selectedClass.getAttributes(); // crée un modèle de liste d'objets StringDetail
+				attributesJList = new JList<StringDetail>(listModel); // crée une JList contenant les objets StringDetail (attributs) en utilisant le bon modele d'affichage (listModel)
+				listModel = selectedClass.getMethods();
+				methodsJList = new JList<StringDetail>(listModel);
+				listModel = selectedClass.getSubClasses();
+				subClassesJList = new JList<StringDetail>(listModel);
+				listModel = selectedClass.getRelations();
+				relationsJList = new JList<StringDetail>(listModel);
 				
-				detailsBox.setText(selectedClass.getName().getDetail()); // détails de Classe
-				attributeBox.setViewportView(attributesJList); //
+				detailsBox.setText(selectedClass.getName().getDetail()); // détails BNF de Classe
+				attributeBox.setViewportView(attributesJList); // ajout des attributs de la classe selectionnée
+				methodBox.setViewportView(methodsJList); // ajout des méthodes de la classe selectionnée
+				subClassBox.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnée
+				relationsBox.setViewportView(relationsJList); // ajout des relations de la classe selectionnée
 				
 			}
 		});
@@ -133,7 +151,7 @@ public class Parseur extends JPanel {
 	
 	public void findAndTreatType(String instruction){
 		Pattern patternClass          = Pattern.compile("CLASS\\s\\w+\\s+ATTRIBUTES\\s+(\\w|\\:|\\,|\\(|\\)|\\s)*OPERATIONS(\\w|\\:|\\,|\\(|\\)|\\s)*");
-		Pattern patternGeneralization = Pattern.compile("GENERALIZATION\\s\\w+\\s+SUBCLASSES\\s\\w+\\,\\s\\w+");
+		Pattern patternGeneralization = Pattern.compile("GENERALIZATION[\\s]+[\\w]+[\\s]+SUBCLASSES[\\w|\\,|\\s]+");
 		Pattern patternRelation       = Pattern.compile("RELATION\\s\\w+\\s+ROLES\\s+(CLASS \\w+\\s\\w+\\,*\\s+){2}");
 		Pattern patternAggregation    = Pattern.compile("AGGREGATION\\s+CONTAINER\\s+CLASS\\s\\w+\\s\\w+\\s+PARTS\\s+CLASS\\s\\w+\\s\\w+\\s+");
 		
@@ -144,19 +162,26 @@ public class Parseur extends JPanel {
 		Matcher matcherAggregation = patternAggregation.matcher(instruction);
 		
 		if (matcherClass.find()) {
-			database.addClass(matcherClass.group(0));
+			String result = database.addClass(matcherClass.group(0));
+			if(!result.isEmpty()) {
+				// result a retourné un string non vide donc contient un message d'erreur
+				JOptionPane.showMessageDialog(frame, result , "Erreur - Doublon détecté !",  JOptionPane.OK_CANCEL_OPTION);
+			}
 			return;
 		}
 		
 		if (matcherGeneralization.find()) {
+			database.addGeneralization(matcherGeneralization.group(0));
 			return;
 		}
 		
 		if (matcherRelation.find()) {
+			database.addAssociation(matcherRelation.group(0));
 			return;
 		}
 		
 		if (matcherAggregation.find()) {
+			database.addAggregation(matcherAggregation.group(0));
 			return;
 		}
 		return;
