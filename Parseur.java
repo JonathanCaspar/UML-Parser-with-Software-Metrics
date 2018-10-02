@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.File;
 import java.awt.event.*;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Dimension;
@@ -18,7 +19,6 @@ import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
 
 public class Parseur extends javax.swing.JFrame {
 	
@@ -43,7 +43,6 @@ public class Parseur extends javax.swing.JFrame {
 	public Parseur() {
 
 		initComponents();
-		
 		database = new Database();
 		
 		jButton_file.addActionListener(new ActionListener(){
@@ -55,17 +54,17 @@ public class Parseur extends javax.swing.JFrame {
 
                         try{
                         	database.resetDB();
+                        	jPanelClass.removeAll();
+                        	
 					    	fileStrings = readFile(file.toPath().toString(),Charset.forName("UTF-8"));
 
 					    	//decouper avec ; (classe, generalisation, relations)
 					    	String[] tab = fileStrings.split("\\;");
-
 				    	
 					    	for(int j=0; j < tab.length; j++){
 					    		findAndTreatType(tab[j]);
 					    	}
-					    	database.showDBcontent();
-
+		
 					    	afficherDansJPanel();
 
 					    } catch(IOException ex){
@@ -100,7 +99,6 @@ public class Parseur extends javax.swing.JFrame {
 		Pattern patternRelation       = Pattern.compile("RELATION\\s\\w+\\s+ROLES\\s+(CLASS \\w+\\s\\w+\\,*\\s+){2}");
 		Pattern patternAggregation    = Pattern.compile("AGGREGATION\\s+CONTAINER\\s+CLASS\\s\\w+\\s\\w+\\s+PARTS\\s+CLASS\\s\\w+\\s\\w+\\s+");
 		
-		
 		Matcher matcherClass = patternClass.matcher(instruction);
 		Matcher matcherGeneralization = patternGeneralization.matcher(instruction);
 		Matcher matcherRelation = patternRelation.matcher(instruction);
@@ -110,7 +108,7 @@ public class Parseur extends javax.swing.JFrame {
 			String result = database.addClass(matcherClass.group(0));
 			if(!result.isEmpty()) {
 				// result a retourné un string non vide donc contient un message d'erreur
-				//JOptionPane.showMessageDialog(frame, result , "Erreur - Doublon détecté !",  JOptionPane.OK_CANCEL_OPTION);
+				System.out.println(result);
 			}
 			return;
 		}
@@ -135,14 +133,12 @@ public class Parseur extends javax.swing.JFrame {
 
 	//affiche les infos des classes dans le JPanel
     public void afficherDansJPanel(){
-
+    	
     	//recuperer les classes
     	DefaultListModel<Classe> allClasse = database.getClasses();
-
     	int nbClass = allClasse.size();
 
     	jPanelClass.setLayout(new GridLayout(0, 1));
-
 
         for(int i=0; i<nbClass;i++){ 
 
@@ -157,11 +153,14 @@ public class Parseur extends javax.swing.JFrame {
             
             Color backcolor = Color.decode("#213F56");
             Color focuscolor = Color.decode("#894627");
+            Color selectedcolor = Color.decode("#89462F");
             
             l.setBackground(backcolor);
             l.addMouseListener(new MouseListener(){
                 public void mouseEntered(MouseEvent event) {
-                    l.setBackground(focuscolor);
+                	if (l.getBackground() != selectedcolor) {
+                		l.setBackground(focuscolor);
+                	}
                 }
                 public void mouseExited(MouseEvent e){
                     if (l.getBackground() == focuscolor) {
@@ -173,9 +172,16 @@ public class Parseur extends javax.swing.JFrame {
                 public void mousePressed(MouseEvent event) {}
                 public void mouseReleased(MouseEvent event) {}
                 public void mouseClicked(MouseEvent event) {
-                	changeValue(classeActuel);
-                }
-                
+                	// on reset la couleur des autres labels
+                	Component[] labels = jPanelClass.getComponents();
+                	for(int i=0; i < nbClass; i++){ 
+                		labels[i].setBackground(backcolor);               		
+                	}
+                	l.setBackground(selectedcolor);
+                    l.repaint();
+                	// Classe selectionnée : on affiche ses détails
+                	displayClassInfo(classeActuel);
+                }  
             });
             
             jPanelClass.add(l);
@@ -184,7 +190,7 @@ public class Parseur extends javax.swing.JFrame {
         }
     }
 
-    public void changeValue(Classe selectedClass){
+    public void displayClassInfo(Classe selectedClass){
 
 		DefaultListModel<StringDetail> listModel;
 		JList<StringDetail> attributesJList;
@@ -227,13 +233,9 @@ public class Parseur extends javax.swing.JFrame {
 		
     }
 	
-	
-
     public void closeMouseClicked(java.awt.event.MouseEvent evt) {                                   
         System.exit(0);
     }
-
-
     
    	//initialise les elements du JFrame
     public void initComponents() {
