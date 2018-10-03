@@ -13,6 +13,10 @@ public class Database {
 		classes = new ArrayList<Classe>();
 	}
 
+	/** Ajoute dans la structure de données interne un objet Classe avec ses attributs et méthodes extraites d'une instruction
+	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 * @return	l'erreur trouvée si elle existe
+	 */
 	public String addClass(String instruction) {
 		Pattern attrPattern = Pattern.compile("(ATTRIBUTES)[\\w|\\s|\\:|\\,]+(?=OPERATIONS)");
 		Pattern operationPattern = Pattern.compile("(?:OPERATIONS)[\\w|\\s|\\:|\\,|\\(|\\)]+");
@@ -188,18 +192,6 @@ public class Database {
 			listModel.addElement(classes.get(i));
 		}
 		return listModel;
-	}
-
-	public void showDBcontent() {
-		for (int i = 0; i < classes.size(); i++) {
-			Classe selectedClass = classes.get(i);
-			System.out.println("Classe: " + selectedClass.getName());
-			System.out.println("Attributs: " + selectedClass.getAttributes());
-			System.out.println("Methodes: " + selectedClass.getMethods());
-			System.out.println("Sous-classes: " + selectedClass.getSubClasses());
-			System.out.println("Relations: " + selectedClass.getRelations());
-			System.out.println("--------------------------------------");
-		}
 	}
 
 	public void resetDB() {
