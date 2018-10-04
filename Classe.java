@@ -33,6 +33,10 @@ public class Classe {
 		subClass.set(value, detail);
 	}
 	
+	/**Concatène les relations de la Classe dans une seule chaîne de caractères
+	 * @param	value   informations liées à la relation
+	 * @param	detail  grammaire BNF qui décrit la relation
+	 */
 	public void addRelation(String value, String detail) {
 		String oldValue = relations.getValue();
 		String oldDetail = relations.getDetail();
@@ -93,12 +97,18 @@ public class Classe {
 	}
 }
 
-
-// Permet de créer un objet regroupant une valeur (nom, attributs..) avec sa description BNF
+/**
+ * Permet de créer un objet regroupant une valeur (nom, attributs..) avec sa description BNF
+ */
 class StringDetail {
 	private String value;
 	private String detail;
 	
+	/**
+	 * Regroupe deux valeurs de type String
+	 * @param	value   information
+	 * @param	detail  grammaire BNF qui décrit l'information à extraire
+	 */
 	public StringDetail(String value, String detail) {
 		this.value = value;
 		this.detail = detail;

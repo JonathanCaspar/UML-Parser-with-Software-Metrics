@@ -13,7 +13,8 @@ public class Database {
 		classes = new ArrayList<Classe>();
 	}
 
-	/** Ajoute dans la structure de données interne un objet Classe avec ses attributs et méthodes extraites d'une instruction
+	/** 
+	 * Ajoute un objet Classe avec ses attributs et méthodes extraites d'une instruction, dans la structure de données interne (si celui-ci n'existe pas déjà) 
 	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
 	 * @return	l'erreur trouvée si elle existe
 	 */
@@ -98,6 +99,10 @@ public class Database {
 					+ "Seules les informations de la première occurence de " + className + " seront enregistrées.";
 	}
 
+	/** 
+	 * Ajoute à la super classe concernée (Classe) des sous-classes étant donné une instruction, dans la structure de données interne 
+	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 */
 	public void addGeneralization(String instruction) {
 		Pattern generaPattern = Pattern.compile("(?:GENERALIZATION\\s+)([\\w]+)(?:\\s+SUBCLASSES\\s+)([\\w|\\,|\\s]+)");
 		Matcher generaMatcher = generaPattern.matcher(instruction);
@@ -123,6 +128,10 @@ public class Database {
 		}
 	}
 
+	/** 
+	 * Modifie deux objets Classe pour respectivement mettre à jour leurs associations étant donné une instruction, dans la structure de données interne 
+	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 */
 	public void addAssociation(String instruction) {
 		Pattern relationPattern = Pattern.compile(
 				"RELATION\\s+(\\w+)\\s+ROLES\\s+CLASS[\\s]+([\\w]+)[\\s]+[\\w]+\\,[\\s]*CLASS[\\s]+([\\w]+)[\\s]+[\\w]+");
@@ -144,6 +153,10 @@ public class Database {
 		}
 	}
 
+	/** 
+	 * Modifie deux objets Classe pour respectivement mettre à jour leurs relations d'aggregation étant donné une instruction, dans la structure de données interne 
+	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 */
 	public void addAggregation(String instruction) {
 		Pattern aggregationPattern = Pattern
 				.compile("AGGREGATION\\s+CONTAINER\\s+CLASS\\s+(\\w+)\\s+\\w+\\s+PARTS([\\s|\\w|\\,]+)");
@@ -176,15 +189,24 @@ public class Database {
 		}
 	}
 
-	public Classe classExists(String searchClass) {
+	/**
+	 * Vérifie l'existance d'un objet de type Classe (identifié par son nom) dans la structure de données interne
+	 * @param	searchedClass  nom de la classe à rechercher
+	 * @return	la référence de la Classe cherchée si elle existe
+	 */
+	public Classe classExists(String searchedClass) {
 		for (int i = 0; i < classes.size(); i++) {
-			if (classes.get(i).getName().getValue().equals(searchClass)) {
+			if (classes.get(i).getName().getValue().equals(searchedClass)) {
 				return classes.get(i);
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Forme une liste de toutes les classes enregistrées étant graphiquement modélisable dans un JList
+	 * @return	la liste des classes enregistrées
+	 */
 	// Retourne une ArrayList d'objet StringDetail détaillant le nom des classes
 	public DefaultListModel<Classe> getClasses() {
 		DefaultListModel<Classe> listModel = new DefaultListModel();
@@ -194,6 +216,9 @@ public class Database {
 		return listModel;
 	}
 
+	/**
+	 * Réinitialise la base de données et supprime les classes enregistrées
+	 */
 	public void resetDB() {
 		classes.clear();
 	}

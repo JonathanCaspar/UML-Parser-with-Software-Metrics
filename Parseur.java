@@ -22,6 +22,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -35,9 +36,6 @@ import javax.swing.filechooser.FileSystemView;
 public class Parseur extends javax.swing.JFrame {
 
 	public Database database;
-	
-	public File file;
-	public String fileStrings;
 
 	private JLabel closeButton;
 	private JButton loadFileButton;
@@ -62,7 +60,7 @@ public class Parseur extends javax.swing.JFrame {
 
 		loadFileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				file = searchFile();
+				File file = searchFile();
 				if (file != null) {
 					filename.setText(file.getName());
 					filename.setEditable(false);
@@ -72,7 +70,7 @@ public class Parseur extends javax.swing.JFrame {
 						database.resetDB();
 						jPanelClass.removeAll();
 
-						fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
+						String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
 						// decoupage des instructions séparées par ";" (classe, generalisation, relations)
 						String[] tab = fileStrings.split("\\;");
@@ -96,24 +94,51 @@ public class Parseur extends javax.swing.JFrame {
 		});
 	}
 
-	// met le fichier dans un String
+	/** 
+	 * Met le contenu d'un fichier dans un String
+	 * @param path	adresse du fichier
+	 * @param encoding type d'encodage
+	 * @return le contenu d'un fichier
+	 * @throws IOException erreur de lecture
+	 */
 	public String readFile(String path, Charset encoding) throws IOException {
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);
 	}
 
-	// cherche un fichier dans l'odinateur
+	/** 
+	 * Cherche un fichier dans l'ordinateur
+	 * @return le fichier selectionné
+	 */
 	public File searchFile() {
 		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
 		int returnVal = jfc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			return jfc.getSelectedFile();
+			File chosenFile = jfc.getSelectedFile();
+			
+			String[] splitName = chosenFile.getName().split("\\.");
+			String format = splitName[splitName.length-1];
+
+			if(format.equals("ucd")) {
+				return chosenFile;
+			}
+			else {
+				JOptionPane.showMessageDialog(this,
+					    "Vous avez sélectionné un fichier au format \"." + format + "\".\nSeul le format \".ucd\" est accepté.",
+					    "Format de fichier incorrect",
+					    JOptionPane.WARNING_MESSAGE);
+				return null;
+			}
 		} else {
 			return null;
 		}
 	}
 
+	/**
+	 * Détecte le type d'une instruction (attributs, méthodes, relations ...) en grammaire BNF et fait le traitement adéquat
+	 * @param instruction	séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 */
 	public void findAndTreatType(String instruction) {
 		Pattern patternClass = Pattern.compile("CLASS\\s\\w+\\s+ATTRIBUTES\\s+(\\w|\\:|\\,|\\(|\\)|\\s)*OPERATIONS(\\w|\\:|\\,|\\(|\\)|\\s)*");
 		Pattern patternGeneralization = Pattern.compile("GENERALIZATION[\\s]+[\\w]+[\\s]+SUBCLASSES[\\w|\\,|\\s]+");
@@ -151,7 +176,9 @@ public class Parseur extends javax.swing.JFrame {
 		return;
 	}
 
-	// affiche les infos des classes dans le JPanel
+	/** 
+	 * Affiche les infos des classes dans le JPanel 
+	 */
 	public void afficherDansJPanel() {
 
 		// recuperer les classes
@@ -217,6 +244,10 @@ public class Parseur extends javax.swing.JFrame {
 		}
 	}
 
+	/**
+	 * Charge les informations d'une Classe dans l'interface
+	 * @param selectedClass classe dont on veut afficher les informations
+	 */
 	public void showClassInfo(Classe selectedClass) {
 
 		DefaultListModel<StringDetail> listModel;
@@ -262,7 +293,10 @@ public class Parseur extends javax.swing.JFrame {
 
 	}
 	
-	// chaque clic sur un élement affiche son détail BNF associé dans Détails
+	/**
+	 * Chaque clic sur un élement affiche son détail BNF associé dans la partie Détails
+	 * @param panel  panel cible du lien d'écoute
+	 */
 	public void addListenerToShowDetails(JScrollPane panel) {
 		JViewport viewport = panel.getViewport(); 
 		JList<StringDetail> list = (JList<StringDetail>) viewport.getView(); 
@@ -279,7 +313,9 @@ public class Parseur extends javax.swing.JFrame {
 		System.exit(0);
 	}
 
-	// initialise les elements du JFrame
+	/** 
+	 * Initialise les elements de l'interface
+	 */
 	public void initComponents() {
 
 		jPanelClassName = new JPanel();
@@ -474,5 +510,4 @@ public class Parseur extends javax.swing.JFrame {
 	public static void main(String[] args) {
 		new Parseur().setVisible(true);
 	}
-
 }
