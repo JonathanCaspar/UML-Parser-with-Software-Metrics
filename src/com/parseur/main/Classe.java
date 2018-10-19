@@ -1,5 +1,7 @@
 package com.parseur.main;
 
+import java.util.ArrayList;
+
 import javax.swing.DefaultListModel;
 
 public class Classe {
@@ -8,6 +10,8 @@ public class Classe {
 	private StringDetail methods;
 	private StringDetail subClass;
 	private StringDetail relations;
+	
+	private Metrics metrics;
 	
 	public Classe() {
 		nom = new StringDetail();
@@ -89,6 +93,15 @@ public class Classe {
 			listModel.addElement(new StringDetail(splitRelationsValue[i], splitRelationsDetail[i]));
 		}
 		return listModel; 
+	}
+	
+	/**
+	 * Calcule les métriques d'une classe donnée
+	 * @param classes
+	 */
+	public void computeMetrics(ArrayList<Classe> allClasses) {
+		metrics = new Metrics(this, allClasses);
+		System.out.println(metrics);
 	}
 	
 	

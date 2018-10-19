@@ -80,8 +80,12 @@ public class Parseur extends javax.swing.JFrame {
 							findAndTreatType(tab[j]);
 						}
 						
+						// calcul des métriques
+						database.computeAllClassesMetrics();
+						
 						// base de données construite : on l'affiche dans la JFrame Parseur
 						afficherDansJPanel();
+
 
 					} catch (IOException ex) {
 						System.out.println("Could not read file");
@@ -182,7 +186,7 @@ public class Parseur extends javax.swing.JFrame {
 	public void afficherDansJPanel() {
 
 		// recuperer les classes
-		DefaultListModel<Classe> allClasse = database.getClasses();
+		DefaultListModel<Classe> allClasse = database.getListModelClasses();
 		int nbClass = allClasse.size();
 
 		jPanelClass.setLayout(new GridLayout(0, 1));

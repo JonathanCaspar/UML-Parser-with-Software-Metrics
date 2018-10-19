@@ -208,12 +208,22 @@ public class Database {
 	 * @return	la liste des classes enregistrées
 	 */
 	// Retourne une ArrayList d'objet StringDetail détaillant le nom des classes
-	public DefaultListModel<Classe> getClasses() {
+	public DefaultListModel<Classe> getListModelClasses() {
 		DefaultListModel<Classe> listModel = new DefaultListModel();
 		for (int i = 0; i < classes.size(); i++) {
 			listModel.addElement(classes.get(i));
 		}
 		return listModel;
+	}
+	
+	/**
+	 * Calcule et associe à chaque classe les métriques encapsulées dans un objet Metrics 
+	 */
+	public void computeAllClassesMetrics() {
+		for (int i = 0; i < classes.size(); i++) {
+			System.out.println("Classe : " + classes.get(i));
+			classes.get(i).computeMetrics(classes);
+		}
 	}
 
 	/**
