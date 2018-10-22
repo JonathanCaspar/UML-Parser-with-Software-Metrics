@@ -209,7 +209,7 @@ public class Database {
 	 * @return	la liste des classes enregistrées
 	 */
 	// Retourne une ArrayList d'objet StringDetail détaillant le nom des classes
-	public DefaultListModel<Classe> getListModelClasses() {
+	public DefaultListModel<Classe> getClasses() {
 		DefaultListModel<Classe> listModel = new DefaultListModel<Classe>();
 		for (int i = 0; i < classes.size(); i++) {
 			listModel.addElement(classes.get(i));

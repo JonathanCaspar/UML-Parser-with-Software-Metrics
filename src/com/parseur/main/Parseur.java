@@ -186,7 +186,7 @@ public class Parseur extends javax.swing.JFrame {
 	public void afficherDansJPanel() {
 
 		// recuperer les classes
-		DefaultListModel<Classe> allClasse = database.getListModelClasses();
+		DefaultListModel<Classe> allClasse = database.getClasses();
 		int nbClass = allClasse.size();
 
 		jPanelClass.setLayout(new GridLayout(0, 1));
