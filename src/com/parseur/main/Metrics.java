@@ -4,85 +4,80 @@ import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 
-public class Metrics {
-	private float ANA;
-	private int NOM, NOA, ITC, ETC, CAC, DIT, CLD, NOC, NOD;
+public class Metrics {	
+	private ArrayList<Classe> classes;
+	private Classe c;
 	
-	public Metrics (Classe c, ArrayList<Classe> allClasses) {
-		ANA = computeANA(c);
-		NOM = computeNOM();
-		NOA = computeNOA();
-		ITC = computeITC();
-		ETC = computeETC();
-		CAC = computeCAC();
-		DIT = computeDIT();
-		CLD = computeCLD();
-		NOC = computeNOC(c);
-		NOD = computeNOD();
-	}
-	
-
-	private float computeANA(Classe c) {
-		return 0;
+	public Metrics (ArrayList<Classe> classes) {
+		this.classes = classes;
 	}
 
-	private int computeNOM() {
+	private String computeANA() {
+		return "5";
+	}
+
+	private String computeNOM() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
 
-	private int computeNOA() {
+	private String computeNOA() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
 
-	private int computeITC() {
+	private String computeITC() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
 
-	private int computeETC() {
+	private String computeETC() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
 
-	private int computeCAC() {
+	private String computeCAC() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
 
-	private int computeDIT() {
+	private String computeDIT() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
 
-	private int computeCLD() {
+	private String computeCLD() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
 
-	private int computeNOC(Classe c) {
+	private String computeNOC() {
 		DefaultListModel<StringDetail> subClasses = c.getSubClasses();
-		System.out.println(subClasses);
-		return subClasses.getSize();
+		if( subClasses.firstElement().getValue().length() != 0){
+			return String.valueOf(subClasses.getSize());
+		}
+		return "0";
 	}
 
-	private int computeNOD() {
+	private String computeNOD() {
 		// TODO Auto-generated method stub
-		return 0;
+		return "0";
 	}
-	
-	public String toString() {
-		return "\nANA = "+ ANA + 
-				"\nNOM = " + NOM + 
-				"\nNOA = " + NOA + 
-				"\nITC = " + ITC + 
-				"\nETC = " + ETC + 
-				"\nCAC = " + CAC + 
-				"\nDIT = " + DIT + 
-				"\nCLD = " + CLD + 
-				"\nNOC = " + NOC + 
-				"\nNOD = " + NOD;
+
+	public String[] computeMetricsOf(Classe currentClass) {
+		this.c = currentClass; // on stocke la classe actuelle dans Metrics pour qu'elle soit accessible par toutes les méthodes "ComputeXXX"
+		
+		String[] result = {computeANA(),
+						   computeNOM(),
+						   computeNOA(),
+						   computeITC(),
+						   computeETC(),
+						   computeCAC(),
+						   computeDIT(),
+						   computeCLD(),
+						   computeNOC(),
+						   computeNOD()};
+		return result;
+		
 	}
-	
 }

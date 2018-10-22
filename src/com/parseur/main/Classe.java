@@ -1,6 +1,8 @@
 package com.parseur.main;
 
-import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.DefaultListModel;
 
@@ -11,7 +13,7 @@ public class Classe {
 	private StringDetail subClass;
 	private StringDetail relations;
 	
-	private Metrics metrics;
+	private MetricsData metrics;
 	
 	public Classe() {
 		nom = new StringDetail();
@@ -19,6 +21,7 @@ public class Classe {
 		methods = new StringDetail();
 		subClass = new StringDetail();
 		relations = new StringDetail();
+		metrics = new MetricsData();
 	}
 	
 	public void setName(String value, String detail) {
@@ -35,6 +38,10 @@ public class Classe {
 	
 	public void setSubClasses(String value, String detail) {
 		subClass.set(value, detail);
+	}
+	
+	public void setMetrics(String[] data) {
+		metrics.updateMetrics(data);
 	}
 	
 	/**Concatène les relations de la Classe dans une seule chaîne de caractères
@@ -55,7 +62,7 @@ public class Classe {
 	public StringDetail getName() { return nom; }
 	
 	public DefaultListModel<StringDetail> getAttributes() { 
-		DefaultListModel<StringDetail> listModel = new DefaultListModel();
+		DefaultListModel<StringDetail> listModel = new DefaultListModel<StringDetail>();
 		String[] splitAttributes = attributes.getValue().split("\\;");
 		
 		for(int i = 0; i < splitAttributes.length; i++) {
@@ -65,7 +72,7 @@ public class Classe {
 	}
 	
 	public DefaultListModel<StringDetail> getMethods() { 
-		DefaultListModel<StringDetail> listModel = new DefaultListModel();
+		DefaultListModel<StringDetail> listModel = new DefaultListModel<StringDetail>();
 		String[] splitMethods = methods.getValue().split("\\;");
 		
 		for(int i = 0; i < splitMethods.length; i++) {
@@ -75,7 +82,7 @@ public class Classe {
 	}
 	
 	public DefaultListModel<StringDetail> getSubClasses() { 
-		DefaultListModel<StringDetail> listModel = new DefaultListModel();
+		DefaultListModel<StringDetail> listModel = new DefaultListModel<StringDetail>();
 		String[] splitSubClasses = subClass.getValue().split("\\;");
 		
 		for(int i = 0; i < splitSubClasses.length; i++) {
@@ -85,7 +92,7 @@ public class Classe {
 	}
 	
 	public DefaultListModel<StringDetail> getRelations() { 
-		DefaultListModel<StringDetail> listModel = new DefaultListModel();
+		DefaultListModel<StringDetail> listModel = new DefaultListModel<StringDetail>();
 		String[] splitRelationsValue = relations.getValue().split("\\;");
 		String[] splitRelationsDetail = relations.getDetail().split("\\;");
 		
@@ -95,15 +102,22 @@ public class Classe {
 		return listModel; 
 	}
 	
+	public DefaultListModel<String> getMetrics() { 
+		DefaultListModel<String> listModel = new DefaultListModel<String>();	
+		Map<String, String> metricsDict = metrics.getDict();
+		
+		Set<String> keys = metricsDict.keySet();
+        for(String key: keys){
+        	listModel.addElement(key + " = " + metricsDict.get(key));
+        }
+		
+		return listModel; 
+	}
+
 	/**
 	 * Calcule les métriques d'une classe donnée
 	 * @param classes
 	 */
-	public void computeMetrics(ArrayList<Classe> allClasses) {
-		metrics = new Metrics(this, allClasses);
-		System.out.println(metrics);
-	}
-	
 	
 	public String toString() {
 		return this.nom.getValue();

@@ -8,6 +8,7 @@ import javax.swing.DefaultListModel;
 
 public class Database {
 	private ArrayList<Classe> classes;
+	private Metrics metrics;
 
 	public Database() {
 		classes = new ArrayList<Classe>();
@@ -190,7 +191,7 @@ public class Database {
 	}
 
 	/**
-	 * Vérifie l'existance d'un objet de type Classe (identifié par son nom) dans la structure de données interne
+	 * Vérifie l'existence d'un objet de type Classe (identifié par son nom) dans la structure de données interne
 	 * @param	searchedClass  nom de la classe à rechercher
 	 * @return	la référence de la Classe cherchée si elle existe
 	 */
@@ -209,7 +210,7 @@ public class Database {
 	 */
 	// Retourne une ArrayList d'objet StringDetail détaillant le nom des classes
 	public DefaultListModel<Classe> getListModelClasses() {
-		DefaultListModel<Classe> listModel = new DefaultListModel();
+		DefaultListModel<Classe> listModel = new DefaultListModel<Classe>();
 		for (int i = 0; i < classes.size(); i++) {
 			listModel.addElement(classes.get(i));
 		}
@@ -217,12 +218,26 @@ public class Database {
 	}
 	
 	/**
-	 * Calcule et associe à chaque classe les métriques encapsulées dans un objet Metrics 
+	 * Calcule et associe à chaque classe les métriques encapsulées dans un objet MetricsData
 	 */
-	public void computeAllClassesMetrics() {
-		for (int i = 0; i < classes.size(); i++) {
-			System.out.println("Classe : " + classes.get(i));
-			classes.get(i).computeMetrics(classes);
+	public void computeAllMetrics() {
+		if (this.metrics == null) {
+			metrics = new Metrics(classes);
+		}
+		
+		for (int i = 0; i < classes.size(); i++) {				
+			Classe currentClass = classes.get(i);
+			System.out.println(currentClass + " :");
+			System.out.println("AVANT : " + currentClass.getMetrics());
+			
+			// Calcule les métriques de currentClass
+			String[] data = metrics.computeMetricsOf(currentClass);
+			
+			if (data != null) {
+				// Actualise les métriques de currentClass
+				currentClass.setMetrics(data);
+				System.out.println("APRES : " + currentClass.getMetrics());
+			}
 		}
 	}
 

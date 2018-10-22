@@ -81,7 +81,7 @@ public class Parseur extends javax.swing.JFrame {
 						}
 						
 						// calcul des métriques
-						database.computeAllClassesMetrics();
+						database.computeAllMetrics();
 						
 						// base de données construite : on l'affiche dans la JFrame Parseur
 						afficherDansJPanel();
