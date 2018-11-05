@@ -58,6 +58,40 @@ public class Parseur extends javax.swing.JFrame {
 		initComponents();
 		database = new Database();
 
+		//Pour charger directement à l'ouverture ---- POUR DEBUGGER SEULEMENT
+		File file = new File("./Ligue.ucd");
+		if (file != null) {
+			filename.setText(file.getName());
+			filename.setEditable(false);
+
+			try {
+				// réintialisation des données après chaque chargement de fichier
+				database.resetDB();
+				jPanelClass.removeAll();
+
+				String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
+
+				// decoupage des instructions séparées par ";" (classe, generalisation, relations)
+				String[] tab = fileStrings.split("\\;");
+
+				for (int j = 0; j < tab.length; j++) {
+					// analyse le type d'instruction puis la traite
+					findAndTreatType(tab[j]);
+				}
+				
+				// calcul des métriques
+				database.computeAllMetrics();
+				
+				// base de données construite : on l'affiche dans la JFrame Parseur
+				afficherDansJPanel();
+
+
+			} catch (IOException ex) {
+				System.out.println("Could not read file");
+			}
+		}
+		// ---------------
+		
 		loadFileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				File file = searchFile();
@@ -120,7 +154,7 @@ public class Parseur extends javax.swing.JFrame {
 		int returnVal = jfc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File chosenFile = jfc.getSelectedFile();
-			
+			System.out.println(chosenFile.getAbsolutePath());
 			String[] splitName = chosenFile.getName().split("\\.");
 			String format = splitName[splitName.length-1];
 

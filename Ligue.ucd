@@ -1,0 +1,62 @@
+MODEL Ligue
+CLASS Equipe 
+ATTRIBUTES 
+      nom_equipe : String
+OPERATIONS
+      nombre_joueurs() : Integer,
+      entraineur() : String,
+      add_joueur(element : Joueur) : void
+;
+
+CLASS Participant 
+ATTRIBUTES 
+nom : String
+OPERATIONS
+      sauter() : void
+;
+
+CLASS Joueur
+ATTRIBUTES 
+      saison : Integer,
+      statut : String
+OPERATIONS 
+      nombre_saisons() : Integer,
+      change_statut (st : String) : void
+;
+
+CLASS Entraineur
+ATTRIBUTES 
+      degre : Integer
+OPERATIONS 
+;
+
+CLASS Stade 
+ATTRIBUTES 
+      nom : String,
+      adresse : String
+OPERATIONS 
+      Utilise_par(eq : Equipe, annee : Integer) : Boolean
+;
+
+GENERALIZATION Participant
+	SUBCLASSES Joueur, Entraineur
+;
+
+RELATION est_localisee_a 
+       ROLES
+       CLASS Equipe MANY,
+       CLASS Stade ONE
+;
+
+RELATION dirige 
+       ROLES
+       CLASS Entraineur ONE_OR_MANY,
+       CLASS Equipe ONE
+;
+
+AGGREGATION 
+CONTAINER 
+       CLASS Equipe ONE
+PARTS
+       CLASS Joueur ONE_OR_MANY
+;

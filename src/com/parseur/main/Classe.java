@@ -1,5 +1,6 @@
 package com.parseur.main;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -44,9 +45,9 @@ public class Classe {
 		metrics.updateMetrics(data);
 	}
 	
-	/**Concatène les relations de la Classe dans une seule chaîne de caractères
-	 * @param	value   informations liées à la relation
-	 * @param	detail  grammaire BNF qui décrit la relation
+	/**Concatï¿½ne les relations de la Classe dans une seule chaï¿½ne de caractï¿½res
+	 * @param	value   informations liï¿½es ï¿½ la relation
+	 * @param	detail  grammaire BNF qui dï¿½crit la relation
 	 */
 	public void addRelation(String value, String detail) {
 		String oldValue = relations.getValue();
@@ -115,7 +116,7 @@ public class Classe {
 	}
 
 	/**
-	 * Calcule les métriques d'une classe donnée
+	 * Calcule les mï¿½triques d'une classe donnï¿½e
 	 * @param classes
 	 */
 	
@@ -125,7 +126,7 @@ public class Classe {
 }
 
 /**
- * Permet de créer un objet regroupant une valeur (nom, attributs..) avec sa description BNF
+ * Permet de crï¿½er un objet regroupant une valeur (nom, attributs..) avec sa description BNF
  */
 class StringDetail {
 	private String value;
@@ -134,7 +135,7 @@ class StringDetail {
 	/**
 	 * Regroupe deux valeurs de type String
 	 * @param	value   information
-	 * @param	detail  grammaire BNF qui décrit l'information à extraire
+	 * @param	detail  grammaire BNF qui dï¿½crit l'information ï¿½ extraire
 	 */
 	public StringDetail(String value, String detail) {
 		this.value = value;

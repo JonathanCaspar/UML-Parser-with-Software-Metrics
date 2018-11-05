@@ -30,7 +30,7 @@ public class Database {
 
 		// Parsing du nom de la classe
 		String className = instruction.split("\\s+")[1];
-		if (classExists(className) == null) {
+		if (classExists(classes, className) == null) {
 			newClass.setName(className, instruction); // Nom de classe + description BNF
 
 			// Parsing des attributs
@@ -62,7 +62,7 @@ public class Database {
 				
 					Matcher methodMatcher = methodPattern.matcher(methods);
 					String formattedMethods = "";
-	
+	 
 					// On parse chaque méthode <nom>(<parametres>): <type>
 					while (methodMatcher.find()) {
 						String[] parameters = methodMatcher.group(2).split("\\,");
@@ -110,14 +110,14 @@ public class Database {
 
 		if (generaMatcher.find() && (generaMatcher.group(2) != null)) { // si au moins 1 sous-classe est spécifiée
 			// on vérifie si la super classe indiquée existe
-			Classe superClasse = classExists(generaMatcher.group(1));
+			Classe superClasse = classExists(classes, generaMatcher.group(1));
 			if (superClasse != null) {
 				// on vérifie que chaque sous-classe existe sinon on ne la considère pas
 				String[] subClasses = generaMatcher.group(2).split("\\,");
 				String formattedSubClasses = "";
 
 				for (int i = 0; i < subClasses.length; i++) {
-					Classe subClass = classExists(subClasses[i].trim());
+					Classe subClass = classExists(classes, subClasses[i].trim());
 					if (subClass != null) {
 						formattedSubClasses += (subClasses[i].trim() + ";");
 					}
@@ -143,8 +143,8 @@ public class Database {
 			String className1 = relationMatcher.group(2);
 			String className2 = relationMatcher.group(3);
 
-			Classe class1 = classExists(className1);
-			Classe class2 = classExists(className2);
+			Classe class1 = classExists(classes, className1);
+			Classe class2 = classExists(classes, className2);
 
 			// on vérifie que les deux classes existes sinon la relation est impossible
 			if ((class1 != null) && (class2 != null)) {
@@ -166,7 +166,7 @@ public class Database {
 
 		if (aggregationMatcher.find()) {
 			String containerClassName = aggregationMatcher.group(1).trim();
-			Classe containerClass = classExists(containerClassName);
+			Classe containerClass = classExists(classes, containerClassName);
 
 			if (containerClass != null) {
 				// on récupere les "parts"
@@ -178,7 +178,7 @@ public class Database {
 					if (partExtractMatcher.find()) {
 						// on vérifie si la classe trouvée existe
 						String partClassName = partExtractMatcher.group(1).trim();
-						Classe partClass = classExists(partClassName);
+						Classe partClass = classExists(classes, partClassName);
 
 						if (partClass != null) {
 							containerClass.addRelation("(A) P_" + partClassName, instruction);
@@ -195,7 +195,7 @@ public class Database {
 	 * @param	searchedClass  nom de la classe à rechercher
 	 * @return	la référence de la Classe cherchée si elle existe
 	 */
-	public Classe classExists(String searchedClass) {
+	public static Classe classExists(ArrayList<Classe> classes, String searchedClass) {
 		for (int i = 0; i < classes.size(); i++) {
 			if (classes.get(i).getName().getValue().equals(searchedClass)) {
 				return classes.get(i);
@@ -227,8 +227,7 @@ public class Database {
 		
 		for (int i = 0; i < classes.size(); i++) {				
 			Classe currentClass = classes.get(i);
-			System.out.println(currentClass + " :");
-			System.out.println("AVANT : " + currentClass.getMetrics());
+			System.out.println(currentClass + " : ");
 			
 			// Calcule les métriques de currentClass
 			String[] data = metrics.computeMetricsOf(currentClass);
@@ -236,7 +235,7 @@ public class Database {
 			if (data != null) {
 				// Actualise les métriques de currentClass
 				currentClass.setMetrics(data);
-				System.out.println("APRES : " + currentClass.getMetrics());
+				System.out.println(currentClass.getMetrics());
 			}
 		}
 	}
