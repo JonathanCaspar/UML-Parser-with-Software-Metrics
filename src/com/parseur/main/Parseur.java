@@ -1,34 +1,15 @@
 package com.parseur.main;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileSystemView;
@@ -41,6 +22,7 @@ public class Parseur extends javax.swing.JFrame {
 	private JLabel closeButton;
 	private JButton loadFileButton;
 	private JButton cvsButton;
+	private JButton metricsButton;
 
 	private JLabel jLabel_Classe;
 	private JPanel jPanelInfo;
@@ -56,8 +38,6 @@ public class Parseur extends javax.swing.JFrame {
 	private JScrollPane metricsPane;
 	private JTextArea textDetails;
 	private JTextField filename;
-	
-	private String selectedClass;
 
 	public Parseur() {
 
@@ -71,13 +51,13 @@ public class Parseur extends javax.swing.JFrame {
 			filename.setEditable(false);
 
 			try {
-				// reintialisation des donnees après chaque chargement de fichier
+				// réintialisation des données après chaque chargement de fichier
 				database.resetDB();
 				jPanelClass.removeAll();
 
 				String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
-				// decoupage des instructions separees par ";" (classe, generalisation, relations)
+				// decoupage des instructions séparées par ";" (classe, generalisation, relations)
 				String[] tab = fileStrings.split("\\;");
 
 				for (int j = 0; j < tab.length; j++) {
@@ -85,11 +65,10 @@ public class Parseur extends javax.swing.JFrame {
 					findAndTreatType(tab[j]);
 				}
 				
-				// calcul des metriques
+				// calcul des métriques
 				database.computeAllMetrics();
 				
-				// base de donn�es construite : on l'affiche dans la JFrame Parseur
-
+				// base de données construite : on l'affiche dans la JFrame Parseur
 				afficherDansJPanel();
 
 
@@ -107,13 +86,13 @@ public class Parseur extends javax.swing.JFrame {
 					filename.setEditable(false);
 
 					try {
-						// reintialisation des donnees apres chaque chargement de fichier
+						// réintialisation des données après chaque chargement de fichier
 						database.resetDB();
 						jPanelClass.removeAll();
 
 						String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
-						// decoupage des instructions separees par ";" (classe, generalisation, relations)
+						// decoupage des instructions séparées par ";" (classe, generalisation, relations)
 						String[] tab = fileStrings.split("\\;");
 
 						for (int j = 0; j < tab.length; j++) {
@@ -121,10 +100,10 @@ public class Parseur extends javax.swing.JFrame {
 							findAndTreatType(tab[j]);
 						}
 						
-						// calcul des metriques
+						// calcul des métriques
 						database.computeAllMetrics();
 						
-						// base de donnees construite : on l'affiche dans la JFrame Parseur
+						// base de données construite : on l'affiche dans la JFrame Parseur
 						afficherDansJPanel();
 
 
@@ -153,7 +132,7 @@ public class Parseur extends javax.swing.JFrame {
 
 	/** 
 	 * Cherche un fichier dans l'ordinateur
-	 * @return le fichier selectionne
+	 * @return le fichier selectionné
 	 */
 	public File searchFile() {
 		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
@@ -161,6 +140,7 @@ public class Parseur extends javax.swing.JFrame {
 		int returnVal = jfc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File chosenFile = jfc.getSelectedFile();
+			System.out.println(chosenFile.getAbsolutePath());
 			String[] splitName = chosenFile.getName().split("\\.");
 			String format = splitName[splitName.length-1];
 
@@ -169,7 +149,7 @@ public class Parseur extends javax.swing.JFrame {
 			}
 			else {
 				JOptionPane.showMessageDialog(this,
-					    "Vous avez selectionne un fichier au format \"." + format + "\".\nSeul le format \".ucd\" est accepte.",
+					    "Vous avez sélectionné un fichier au format \"." + format + "\".\nSeul le format \".ucd\" est accepté.",
 					    "Format de fichier incorrect",
 					    JOptionPane.WARNING_MESSAGE);
 				return null;
@@ -180,8 +160,8 @@ public class Parseur extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Detecte le type d'une instruction (attributs, methodes, relations ...) en grammaire BNF et fait le traitement adequat
-	 * @param instruction	sequence de caractères suivant une grammaire BNF decrivant un modèle UML
+	 * Détecte le type d'une instruction (attributs, méthodes, relations ...) en grammaire BNF et fait le traitement adéquat
+	 * @param instruction	séquence de caractères suivant une grammaire BNF décrivant un modèle UML
 	 */
 	public void findAndTreatType(String instruction) {
 		Pattern patternClass = Pattern.compile("CLASS\\s\\w+\\s+ATTRIBUTES\\s+(\\w|\\:|\\,|\\(|\\)|\\s)*OPERATIONS(\\w|\\:|\\,|\\(|\\)|\\s)*");
@@ -197,7 +177,7 @@ public class Parseur extends javax.swing.JFrame {
 		if (matcherClass.find()) {
 			String result = database.addClass(matcherClass.group(0));
 			if (!result.isEmpty()) {
-				// result a retourne un string non vide donc contient un message d'erreur
+				// result a retourné un string non vide donc contient un message d'erreur
 				System.out.println(result);
 			}
 			return;
@@ -265,6 +245,8 @@ public class Parseur extends javax.swing.JFrame {
 				public void mouseReleased(MouseEvent event) {}
 
 				public void mouseClicked(MouseEvent event) {
+					//enlever les anciennes metrics
+					metricsPane.setViewportView(null);
 					// on reset la couleur des autres labels
 					Component[] labels = jPanelClass.getComponents();
 					for (int i = 0; i < nbClass; i++) {
@@ -272,15 +254,19 @@ public class Parseur extends javax.swing.JFrame {
 					}
 					l.setBackground(selectedcolor);
 					l.repaint();
+
+					metricsButton.addMouseListener(new java.awt.event.MouseAdapter() {
+						public void mouseClicked(java.awt.event.MouseEvent evt) {
+							calculerMetrics(classeActuel);
+						}
+					});
 					
-					// Classe selectionnee : on affiche ses details
+					// Classe selectionnée : on affiche ses détails
 					showClassInfo(classeActuel);
-					selectedClass = classeActuel.getName().getValue();
 					addListenerToShowDetails(attributePane);
 					addListenerToShowDetails(methodPane);
 					addListenerToShowDetails(subClassPane);
 					addListenerToShowDetails(relationPane);
-					addMetricListener(metricsPane);
 				}
 			});
 
@@ -301,14 +287,12 @@ public class Parseur extends javax.swing.JFrame {
 		JList<StringDetail> methodsJList;
 		JList<StringDetail> subClassesJList;
 		JList<StringDetail> relationsJList;
-		DefaultListModel<String> listModelMetrics;
-		JList<String> metricsJList;
 
 		Font font = new Font("Menlo", Font.PLAIN, 16);
 		Color color = Color.decode("#894627");
 
-		listModel = selectedClass.getAttributes(); // cree un modèle de liste d'objets StringDetail
-		attributesJList = new JList<StringDetail>(listModel); // cree une JList contenant les objets StringDetail
+		listModel = selectedClass.getAttributes(); // crée un modèle de liste d'objets StringDetail
+		attributesJList = new JList<StringDetail>(listModel); // crée une JList contenant les objets StringDetail
 																// (attributs) en utilisant le bon modele d'affichage
 																// (listModel)
 		listModel = selectedClass.getMethods();
@@ -317,8 +301,6 @@ public class Parseur extends javax.swing.JFrame {
 		subClassesJList = new JList<StringDetail>(listModel);
 		listModel = selectedClass.getRelations();
 		relationsJList = new JList<StringDetail>(listModel);
-		listModelMetrics = selectedClass.getListModelMetrics();
-		metricsJList = new JList<String>(listModelMetrics);
 
 		attributesJList.setFont(font);
 		attributesJList.setForeground(color);
@@ -328,29 +310,25 @@ public class Parseur extends javax.swing.JFrame {
 		subClassesJList.setForeground(color);
 		relationsJList.setFont(font);
 		relationsJList.setForeground(color);
-		metricsJList.setFont(font);
-		metricsJList.setForeground(color);
 
-		// chargement des informations de la classe selectionne dans les panels
-		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnee
-		methodPane.setViewportView(methodsJList); // ajout des methodes de la classe selectionnee
-		subClassPane.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnee
-		relationPane.setViewportView(relationsJList); // ajout des relations de la classe selectionnee
-		metricsPane.setViewportView(metricsJList);
+		// chargement des informations de la classe selectionné dans les panels
+		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnée
+		methodPane.setViewportView(methodsJList); // ajout des méthodes de la classe selectionnée
+		subClassPane.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnée
+		relationPane.setViewportView(relationsJList); // ajout des relations de la classe selectionnée
 
 		textDetails.setFont(font);
 		textDetails.setEditable(false);
 		textDetails.setText(selectedClass.getName().getDetail());
 		textDetails.setForeground(color);
-		detailPane.setViewportView(textDetails); // details BNF de Classe
+		detailPane.setViewportView(textDetails); // détails BNF de Classe
 
 	}
 	
 	/**
-	 * Chaque clic sur un element affiche son detail BNF associe dans la partie Details
-	 * @param panel  panel cible du lien d'ecoute
+	 * Chaque clic sur un élement affiche son détail BNF associé dans la partie Détails
+	 * @param panel  panel cible du lien d'écoute
 	 */
-	@SuppressWarnings("unchecked")
 	public void addListenerToShowDetails(JScrollPane panel) {
 		JViewport viewport = panel.getViewport(); 
 		JList<StringDetail> list = (JList<StringDetail>) viewport.getView(); 
@@ -362,37 +340,6 @@ public class Parseur extends javax.swing.JFrame {
 			}
 		});
 	}
-	
-	/**
-	 * Chaque clic sur une m�trique affiche sa d�finition dans la partie Details
-	 * @param panel  panel cible du lien d'ecoute
-	 */
-	@SuppressWarnings("unchecked")
-	public void addMetricListener(JScrollPane panel) {
-		JViewport viewport = panel.getViewport(); 
-		JList<String> list = (JList<String>) viewport.getView(); 
-
-		list.addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				String clickedData = list.getSelectedValue();
-				String clickedMetric = clickedData.split("\\=")[0].trim();
-
-				// On va chercher la d�finition a l'index qui correspond � la valeur de la metrique selectionnee
-				for (MetricNames metricName : MetricNames.values()) {
-					if(metricName.name().equals(clickedMetric)) {
-						int indexEnum = metricName.ordinal();
-						
-						//On substitue le nom de la classe courante si n�cessaire
-						String definition = Metrics.metricsDefinition[indexEnum].replace("CLASSNAME", selectedClass); 
-						textDetails.setText(definition);
-						break;
-					}
-				}
-				
-			}
-		});
-	}
 
 	public void closeMouseClicked(java.awt.event.MouseEvent evt) {
 		System.exit(0);
@@ -400,22 +347,35 @@ public class Parseur extends javax.swing.JFrame {
 
 	public void produceCSV(){
 		if(file != null){
-			
-			try {
-				String csvFile = "./MetricsOfUML_Diagram.csv";
-				FileWriter writer = new FileWriter(csvFile);
-				database.generateCSVFileForMetrics(writer);
-				
-				String confirmAlert = "Un fichier \""+ csvFile.substring(2) +"\" contenant les m�triques du \ndiagramme UML a �t� g�n�r� dans l'emplacement d'�xecution du programme.";
-				JOptionPane.showMessageDialog(this, confirmAlert, "Cr�ation du fichier de m�triques r�ussie", JOptionPane.INFORMATION_MESSAGE);
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			System.out.println("produire CSV");
 		} else {
 			JOptionPane.showMessageDialog(this,
-					    "Vous devez d'abord selectionner un fichier avant de pouvoir produire le fichier CSV correspondant.",
-					    "Absence de fichier selectionne",
+					    "Vous devez d'abord sélectionner un fichier avant de pouvoir produire le fichier CSV correspondant.",
+					    "Absence de fichier sélectionné",
+					    JOptionPane.WARNING_MESSAGE);
+		}
+	}
+
+	public void calculerMetrics(Classe selectedClass){
+		if (selectedClass != null){
+			JList<String> metricsJList;
+			DefaultListModel<String> listModelMetrics;
+
+			listModelMetrics = selectedClass.getMetrics();
+			metricsJList = new JList<String>(listModelMetrics);
+
+			Font font = new Font("Menlo", Font.PLAIN, 16);
+			Color color = Color.decode("#894627");
+
+			metricsJList.setFont(font);
+			metricsJList.setForeground(color);
+
+			metricsPane.setViewportView(metricsJList);
+
+		} else {
+			JOptionPane.showMessageDialog(this,
+					    "Vous devez d'abord sélectionner une classe avant de pouvoir calculer les métriques.",
+					    "Absence de classe sélectionnée",
 					    JOptionPane.WARNING_MESSAGE);
 		}
 	}
@@ -441,6 +401,7 @@ public class Parseur extends javax.swing.JFrame {
 		detailPane = new JScrollPane();
 		textDetails = new JTextArea(5, 8);
 		metricsPane = new JScrollPane();
+		metricsButton = new JButton();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setUndecorated(true);
@@ -519,6 +480,19 @@ public class Parseur extends javax.swing.JFrame {
 			}
 		});
 
+		metricsButton.setFont(new java.awt.Font("Menlo", 0, 13)); // NOI18N
+        metricsButton.setText("Calculer Métriques");
+        metricsButton.addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				if (file == null){
+					JOptionPane.showMessageDialog(Parseur.this,
+							    "Vous devez d'abord sélectionner un fichier avant de pouvoir calculer les métriques.",
+							    "Absence de fichier sélectionné",
+							    JOptionPane.WARNING_MESSAGE);
+				}
+			}
+		});
+
 		javax.swing.GroupLayout jPanelFileLayout = new javax.swing.GroupLayout(jPanelFile);
 		jPanelFile.setLayout(jPanelFileLayout);
 		jPanelFileLayout.setHorizontalGroup(jPanelFileLayout
@@ -558,9 +532,9 @@ public class Parseur extends javax.swing.JFrame {
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
-                metricsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "M�triques", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
+                metricsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Métriques", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
-		methodPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "M�thodes",
+		methodPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Méthodes",
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
@@ -568,7 +542,7 @@ public class Parseur extends javax.swing.JFrame {
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
-		relationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Associations/agr�gations",
+		relationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Associations/agrégations",
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
@@ -576,11 +550,12 @@ public class Parseur extends javax.swing.JFrame {
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
-		metricsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "M�triques", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
+		metricsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Métriques", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
 
 		javax.swing.GroupLayout jPanelInfoLayout = new javax.swing.GroupLayout(jPanelInfo);
         jPanelInfo.setLayout(jPanelInfoLayout);
+
         jPanelInfoLayout.setHorizontalGroup(
             jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelInfoLayout.createSequentialGroup()
@@ -595,7 +570,11 @@ public class Parseur extends javax.swing.JFrame {
                             .addComponent(methodPane, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
                             .addComponent(relationPane))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(metricsPane,javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(metricsPane)
+                    .addGroup(jPanelInfoLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(metricsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         
@@ -603,12 +582,7 @@ public class Parseur extends javax.swing.JFrame {
             jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelInfoLayout.createSequentialGroup()
-                        .addComponent(metricsPane)
-                        .addContainerGap())
-                    .addGroup(jPanelInfoLayout.createSequentialGroup()
-                        .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(attributePane, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
                             .addComponent(methodPane, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -616,7 +590,13 @@ public class Parseur extends javax.swing.JFrame {
                             .addComponent(subClassPane, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(relationPane))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(detailPane, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(detailPane, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
+				.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelInfoLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(metricsButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(metricsPane)
+                .addContainerGap())
         );
                 
                 
