@@ -41,6 +41,7 @@ public class Parseur extends javax.swing.JFrame {
 	private JLabel closeButton;
 	private JButton loadFileButton;
 	private JButton cvsButton;
+	private JButton metricsButton;
 
 	private JLabel jLabel_Classe;
 	private JPanel jPanelInfo;
@@ -258,6 +259,8 @@ public class Parseur extends javax.swing.JFrame {
 				public void mouseReleased(MouseEvent event) {}
 
 				public void mouseClicked(MouseEvent event) {
+					//enlever les anciennes metrics
+					metricsPane.setViewportView(null);
 					// on reset la couleur des autres labels
 					Component[] labels = jPanelClass.getComponents();
 					for (int i = 0; i < nbClass; i++) {
@@ -265,6 +268,12 @@ public class Parseur extends javax.swing.JFrame {
 					}
 					l.setBackground(selectedcolor);
 					l.repaint();
+					
+					metricsButton.addMouseListener(new java.awt.event.MouseAdapter() {
+						public void mouseClicked(java.awt.event.MouseEvent evt) {
+							calculerMetrics(classeActuel);
+						}
+					});
 					
 					// Classe selectionnee : on affiche ses details
 					showClassInfo(classeActuel);
@@ -311,7 +320,6 @@ public class Parseur extends javax.swing.JFrame {
 		listModel = selectedClass.getRelations();
 		relationsJList = new JList<StringDetail>(listModel);
 		listModelMetrics = selectedClass.getListModelMetrics();
-		metricsJList = new JList<String>(listModelMetrics);
 
 		attributesJList.setFont(font);
 		attributesJList.setForeground(color);
@@ -321,15 +329,12 @@ public class Parseur extends javax.swing.JFrame {
 		subClassesJList.setForeground(color);
 		relationsJList.setFont(font);
 		relationsJList.setForeground(color);
-		metricsJList.setFont(font);
-		metricsJList.setForeground(color);
 
 		// chargement des informations de la classe selectionne dans les panels
 		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnee
 		methodPane.setViewportView(methodsJList); // ajout des methodes de la classe selectionnee
 		subClassPane.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnee
 		relationPane.setViewportView(relationsJList); // ajout des relations de la classe selectionnee
-		metricsPane.setViewportView(metricsJList);
 
 		textDetails.setFont(font);
 		textDetails.setEditable(false);
@@ -412,6 +417,25 @@ public class Parseur extends javax.swing.JFrame {
 					    JOptionPane.WARNING_MESSAGE);
 		}
 	}
+	
+	public void calculerMetrics(Classe selectedClass){
+		if (selectedClass != null){
+			JList<String> metricsJList;
+			DefaultListModel<String> listModelMetrics;
+ 			listModelMetrics = selectedClass.getListModelMetrics();
+			metricsJList = new JList<String>(listModelMetrics);
+ 			Font font = new Font("Menlo", Font.PLAIN, 16);
+			Color color = Color.decode("#894627");
+ 			metricsJList.setFont(font);
+			metricsJList.setForeground(color);
+ 			metricsPane.setViewportView(metricsJList);
+ 		} else {
+			JOptionPane.showMessageDialog(this,
+					    "Vous devez d'abord sélectionner une classe avant de pouvoir calculer les métriques.",
+					    "Absence de classe sélectionnée",
+					    JOptionPane.WARNING_MESSAGE);
+		}
+	}
 
 	/** 
 	 * Initialise les elements de l'interface
@@ -434,6 +458,7 @@ public class Parseur extends javax.swing.JFrame {
 		detailPane = new JScrollPane();
 		textDetails = new JTextArea(5, 8);
 		metricsPane = new JScrollPane();
+		metricsButton = new JButton();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setUndecorated(true);
@@ -512,6 +537,19 @@ public class Parseur extends javax.swing.JFrame {
 			}
 		});
 
+		metricsButton.setFont(new java.awt.Font("Menlo", 0, 13)); // NOI18N
+        metricsButton.setText("Calculer Métriques");
+        metricsButton.addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				if (file == null){
+					JOptionPane.showMessageDialog(Parseur.this,
+							    "Vous devez d'abord sélectionner un fichier avant de pouvoir calculer les métriques.",
+							    "Absence de fichier sélectionné",
+							    JOptionPane.WARNING_MESSAGE);
+				}
+			}
+		});
+
 		javax.swing.GroupLayout jPanelFileLayout = new javax.swing.GroupLayout(jPanelFile);
 		jPanelFile.setLayout(jPanelFileLayout);
 		jPanelFileLayout.setHorizontalGroup(jPanelFileLayout
@@ -574,6 +612,7 @@ public class Parseur extends javax.swing.JFrame {
 
 		javax.swing.GroupLayout jPanelInfoLayout = new javax.swing.GroupLayout(jPanelInfo);
         jPanelInfo.setLayout(jPanelInfoLayout);
+
         jPanelInfoLayout.setHorizontalGroup(
             jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelInfoLayout.createSequentialGroup()
@@ -588,7 +627,11 @@ public class Parseur extends javax.swing.JFrame {
                             .addComponent(methodPane, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
                             .addComponent(relationPane))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(metricsPane,javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(metricsPane)
+                    .addGroup(jPanelInfoLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(metricsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         
@@ -596,12 +639,7 @@ public class Parseur extends javax.swing.JFrame {
             jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelInfoLayout.createSequentialGroup()
-                        .addComponent(metricsPane)
-                        .addContainerGap())
-                    .addGroup(jPanelInfoLayout.createSequentialGroup()
-                        .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(attributePane, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
                             .addComponent(methodPane, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -609,7 +647,13 @@ public class Parseur extends javax.swing.JFrame {
                             .addComponent(subClassPane, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(relationPane))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(detailPane, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(detailPane, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
+				.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelInfoLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(metricsButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(metricsPane)
+                .addContainerGap())
         );
                 
                 
@@ -636,7 +680,7 @@ public class Parseur extends javax.swing.JFrame {
 								Short.MAX_VALUE)));
 
 		pack();
-	} 
+	}  
 
 	public static void main(String[] args) {
             new Parseur().setVisible(true);

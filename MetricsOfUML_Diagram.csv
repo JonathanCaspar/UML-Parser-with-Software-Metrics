@@ -1,6 +1,3 @@
 Classe,ANA,NOM,NOA,ITC,ETC,CAC,DIT,CLD,NOC,NOD
-Equipe,0.33,3,1,1,1,3,0,0,0,0
-Participant,0,1,1,0,0,1,0,2,2,3
-Joueur,0.5,3,3,0,1,2,1,1,1,1
-Entraineur,0,1,2,0,0,2,1,0,0,0
-Stade,2,4,4,1,0,3,2,0,0,0
+Participant,0,1,1,0,0,2,0,1,1,1
+Joueur,0.5,3,3,0,0,3,1,0,0,0
