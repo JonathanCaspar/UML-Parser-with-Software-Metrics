@@ -38,6 +38,8 @@ public class Parseur extends javax.swing.JFrame {
 	private JScrollPane metricsPane;
 	private JTextArea textDetails;
 	private JTextField filename;
+	
+	private String selectedClass;
 
 	public Parseur() {
 
@@ -87,13 +89,13 @@ public class Parseur extends javax.swing.JFrame {
 					filename.setEditable(false);
 
 					try {
-						// rÃ©intialisation des donnÃ©es aprÃ¨s chaque chargement de fichier
+						// reintialisation des donnees apres chaque chargement de fichier
 						database.resetDB();
 						jPanelClass.removeAll();
 
 						String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
-						// decoupage des instructions sÃ©parÃ©es par ";" (classe, generalisation, relations)
+						// decoupage des instructions separees par ";" (classe, generalisation, relations)
 						String[] tab = fileStrings.split("\\;");
 
 						for (int j = 0; j < tab.length; j++) {
@@ -101,7 +103,7 @@ public class Parseur extends javax.swing.JFrame {
 							findAndTreatType(tab[j]);
 						}
 						
-						// calcul des mÃ©triques
+						// calcul des metriques
 						database.computeAllMetrics();
 						
 						// base de donnÃ©es construite : on l'affiche dans la JFrame Parseur
@@ -256,10 +258,12 @@ public class Parseur extends javax.swing.JFrame {
 					
 					// Classe selectionnÃ©e : on affiche ses dÃ©tails
 					showClassInfo(classeActuel);
+					selectedClass = classeActuel.getName().getValue();
 					addListenerToShowDetails(attributePane);
 					addListenerToShowDetails(methodPane);
 					addListenerToShowDetails(subClassPane);
 					addListenerToShowDetails(relationPane);
+					addMetricListener(metricsPane);
 				}
 			});
 
@@ -340,6 +344,32 @@ public class Parseur extends javax.swing.JFrame {
 			}
 		});
 	}
+	
+	public void addMetricListener(JScrollPane panel) {
+		JViewport viewport = panel.getViewport(); 
+		JList<String> list = (JList<String>) viewport.getView(); 
+
+		list.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				String clickedData = list.getSelectedValue();
+				String clickedMetric = clickedData.split("\\=")[0].trim();
+
+				// On va chercher la définition a l'index qui correspond à la valeur de la metrique selectionnee
+				for (MetricNames metricName : MetricNames.values()) {
+					if(metricName.name().equals(clickedMetric)) {
+						int indexEnum = metricName.ordinal();
+						
+						//On substitue le nom de la classe courante si nécessaire
+						String definition = Metrics.metricsDefinition[indexEnum].replace("CLASSNAME", selectedClass); 
+						textDetails.setText(definition);
+						break;
+					}
+				}
+				
+			}
+		});
+	}
 
 	public void closeMouseClicked(java.awt.event.MouseEvent evt) {
 		System.exit(0);
@@ -357,7 +387,6 @@ public class Parseur extends javax.swing.JFrame {
 				JOptionPane.showMessageDialog(this, confirmAlert, "Création du fichier de métriques réussie", JOptionPane.INFORMATION_MESSAGE);
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {

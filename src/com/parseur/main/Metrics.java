@@ -4,17 +4,26 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.DefaultListModel;
-import javax.xml.crypto.Data;
 
 public class Metrics {	
 	private ArrayList<Classe> classes;
 	private Pattern parenthesis = Pattern.compile("[\\w\\s]+\\(([\\w\\,\\s]+)+\\)"); // détecte tout ce qui se trouve entre parenthèses
-	private static String[] metricsDefinition;
+	public static String[] metricsDefinition = {
+			"Nombre moyen d’arguments des méthodes locales pour la classe CLASSNAME.",
+			"Nombre de méthodes locales/héritées de la classe CLASSNAME. Dans le cas où une méthode est héritée et redéfinie localement "
+			+ "(même nom, même ordre et types des arguments et même type de retour), elle ne compte qu’une fois.",
+			"Nombre d’attributs locaux/hérités de la classe CLASSNAME.",
+			"Nombre de fois où d’autres classes du diagramme apparaissent comme types des arguments des méthodes de CLASSNAME.",
+			"Nombre de fois où CLASSNAME apparaît comme type des arguments dans les méthodes des autres classes du diagramme.",
+			"Nombre d’associations (incluant les agrégations) locales/héritées auxquelles participe une classe CLASSNAME.",
+			"Taille du chemin le plus long reliant une classe CLASSNAME à une classe racine dans le graphe d’héritage.",
+			"Taille du chemin le plus long reliant une classe CLASSNAME à une classe feuille dans le graphe d’héritage.",
+			"Nombre de sous-classes directes de CLASSNAME.",
+			"Nombre de sous-classes directes et indirectes de CLASSNAME." };
 
 	public Metrics (ArrayList<Classe> classes) {
 		this.classes = classes;
