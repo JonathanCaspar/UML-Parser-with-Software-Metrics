@@ -143,7 +143,6 @@ public class Parseur extends javax.swing.JFrame {
 		int returnVal = jfc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File chosenFile = jfc.getSelectedFile();
-			System.out.println(chosenFile.getAbsolutePath());
 			String[] splitName = chosenFile.getName().split("\\.");
 			String format = splitName[splitName.length-1];
 

@@ -42,19 +42,24 @@ public class Database {
 			if (attrMatcher.find()) {
 				// On récupére les attributs dans un tableau
 				String rawAttributes = instruction.substring(attrMatcher.start(), attrMatcher.end()).trim();
-				String attributes = rawAttributes.substring(11, rawAttributes.length()).trim(); // on retire le mot "OPERATIONS"
-
-				String[] attrList = attributes.split("\\,");
-				String formattedAttributes = "";
-
-				for (int i = 0; i < attrList.length; i++) {
-					// On affecte chaque attribut étant sous la forme "<nom> : <type>" dans la partie
-					// attributs de "newClass" sous une nouvelle forme : "<type> <nom>,"
-					String[] attribut = attrList[i].trim().split("\\:");
-					formattedAttributes += (attribut[1].trim() + " " + attribut[0].trim()
-							+ (i == attrList.length - 1 ? "" : ";"));
+				if (rawAttributes.length() < 12) {
+					newClass.setAttributes("", "");
 				}
-				newClass.setAttributes(formattedAttributes, rawAttributes);
+				else {
+					String attributes = rawAttributes.substring(11, rawAttributes.length()).trim(); // on retire le mot "OPERATIONS"
+	
+					String[] attrList = attributes.split("\\,");
+					String formattedAttributes = "";
+	
+					for (int i = 0; i < attrList.length; i++) {
+						// On affecte chaque attribut étant sous la forme "<nom> : <type>" dans la partie
+						// attributs de "newClass" sous une nouvelle forme : "<type> <nom>,"
+						String[] attribut = attrList[i].trim().split("\\:");
+						formattedAttributes += (attribut[1].trim() + " " + attribut[0].trim()
+								+ (i == attrList.length - 1 ? "" : ";"));
+					}
+					newClass.setAttributes(formattedAttributes, rawAttributes);
+				}
 			}
 
 			// Parsing de l'ensemble des méthodes
