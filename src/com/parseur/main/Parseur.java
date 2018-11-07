@@ -50,6 +50,7 @@ public class Parseur extends javax.swing.JFrame {
 	private JScrollPane subClassPane;
 	private JScrollPane relationPane;
 	private JScrollPane detailPane;
+	private JScrollPane metricsPane;
 	private JTextArea textDetails;
 	private JTextField filename;
 
@@ -58,20 +59,20 @@ public class Parseur extends javax.swing.JFrame {
 		initComponents();
 		database = new Database();
 
-		//Pour charger directement à l'ouverture ---- POUR DEBUGGER SEULEMENT
+		//Pour charger directement Ã  l'ouverture ---- POUR DEBUGGER SEULEMENT
 		File file = new File("./Ligue.ucd");
 		if (file != null) {
 			filename.setText(file.getName());
 			filename.setEditable(false);
 
 			try {
-				// réintialisation des données après chaque chargement de fichier
+				// rÃ©intialisation des donnÃ©es aprÃ¨s chaque chargement de fichier
 				database.resetDB();
 				jPanelClass.removeAll();
 
 				String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
-				// decoupage des instructions séparées par ";" (classe, generalisation, relations)
+				// decoupage des instructions sÃ©parÃ©es par ";" (classe, generalisation, relations)
 				String[] tab = fileStrings.split("\\;");
 
 				for (int j = 0; j < tab.length; j++) {
@@ -79,10 +80,10 @@ public class Parseur extends javax.swing.JFrame {
 					findAndTreatType(tab[j]);
 				}
 				
-				// calcul des métriques
+				// calcul des mÃ©triques
 				database.computeAllMetrics();
 				
-				// base de données construite : on l'affiche dans la JFrame Parseur
+				// base de donnÃ©es construite : on l'affiche dans la JFrame Parseur
 				afficherDansJPanel();
 
 
@@ -100,13 +101,13 @@ public class Parseur extends javax.swing.JFrame {
 					filename.setEditable(false);
 
 					try {
-						// réintialisation des données après chaque chargement de fichier
+						// rÃ©intialisation des donnÃ©es aprÃ¨s chaque chargement de fichier
 						database.resetDB();
 						jPanelClass.removeAll();
 
 						String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
-						// decoupage des instructions séparées par ";" (classe, generalisation, relations)
+						// decoupage des instructions sÃ©parÃ©es par ";" (classe, generalisation, relations)
 						String[] tab = fileStrings.split("\\;");
 
 						for (int j = 0; j < tab.length; j++) {
@@ -114,10 +115,10 @@ public class Parseur extends javax.swing.JFrame {
 							findAndTreatType(tab[j]);
 						}
 						
-						// calcul des métriques
+						// calcul des mÃ©triques
 						database.computeAllMetrics();
 						
-						// base de données construite : on l'affiche dans la JFrame Parseur
+						// base de donnÃ©es construite : on l'affiche dans la JFrame Parseur
 						afficherDansJPanel();
 
 
@@ -146,7 +147,7 @@ public class Parseur extends javax.swing.JFrame {
 
 	/** 
 	 * Cherche un fichier dans l'ordinateur
-	 * @return le fichier selectionné
+	 * @return le fichier selectionnÃ©
 	 */
 	public File searchFile() {
 		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
@@ -163,7 +164,7 @@ public class Parseur extends javax.swing.JFrame {
 			}
 			else {
 				JOptionPane.showMessageDialog(this,
-					    "Vous avez sélectionné un fichier au format \"." + format + "\".\nSeul le format \".ucd\" est accepté.",
+					    "Vous avez sÃ©lectionnÃ© un fichier au format \"." + format + "\".\nSeul le format \".ucd\" est acceptÃ©.",
 					    "Format de fichier incorrect",
 					    JOptionPane.WARNING_MESSAGE);
 				return null;
@@ -174,8 +175,8 @@ public class Parseur extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Détecte le type d'une instruction (attributs, méthodes, relations ...) en grammaire BNF et fait le traitement adéquat
-	 * @param instruction	séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 * DÃ©tecte le type d'une instruction (attributs, mÃ©thodes, relations ...) en grammaire BNF et fait le traitement adÃ©quat
+	 * @param instruction	sÃ©quence de caractÃ¨res suivant une grammaire BNF dÃ©crivant un modÃ¨le UML
 	 */
 	public void findAndTreatType(String instruction) {
 		Pattern patternClass = Pattern.compile("CLASS\\s\\w+\\s+ATTRIBUTES\\s+(\\w|\\:|\\,|\\(|\\)|\\s)*OPERATIONS(\\w|\\:|\\,|\\(|\\)|\\s)*");
@@ -191,7 +192,7 @@ public class Parseur extends javax.swing.JFrame {
 		if (matcherClass.find()) {
 			String result = database.addClass(matcherClass.group(0));
 			if (!result.isEmpty()) {
-				// result a retourné un string non vide donc contient un message d'erreur
+				// result a retournÃ© un string non vide donc contient un message d'erreur
 				System.out.println(result);
 			}
 			return;
@@ -267,7 +268,7 @@ public class Parseur extends javax.swing.JFrame {
 					l.setBackground(selectedcolor);
 					l.repaint();
 					
-					// Classe selectionnée : on affiche ses détails
+					// Classe selectionnÃ©e : on affiche ses dÃ©tails
 					showClassInfo(classeActuel);
 					addListenerToShowDetails(attributePane);
 					addListenerToShowDetails(methodPane);
@@ -293,12 +294,14 @@ public class Parseur extends javax.swing.JFrame {
 		JList<StringDetail> methodsJList;
 		JList<StringDetail> subClassesJList;
 		JList<StringDetail> relationsJList;
+		DefaultListModel<String> listModelMetrics;
+		JList<String> metricsJList;
 
 		Font font = new Font("Menlo", Font.PLAIN, 16);
 		Color color = Color.decode("#894627");
 
-		listModel = selectedClass.getAttributes(); // crée un modèle de liste d'objets StringDetail
-		attributesJList = new JList<StringDetail>(listModel); // crée une JList contenant les objets StringDetail
+		listModel = selectedClass.getAttributes(); // crÃ©e un modÃ¨le de liste d'objets StringDetail
+		attributesJList = new JList<StringDetail>(listModel); // crÃ©e une JList contenant les objets StringDetail
 																// (attributs) en utilisant le bon modele d'affichage
 																// (listModel)
 		listModel = selectedClass.getMethods();
@@ -307,6 +310,8 @@ public class Parseur extends javax.swing.JFrame {
 		subClassesJList = new JList<StringDetail>(listModel);
 		listModel = selectedClass.getRelations();
 		relationsJList = new JList<StringDetail>(listModel);
+		listModelMetrics = selectedClass.getMetrics();
+		metricsJList = new JList<String>(listModelMetrics);
 
 		attributesJList.setFont(font);
 		attributesJList.setForeground(color);
@@ -316,24 +321,26 @@ public class Parseur extends javax.swing.JFrame {
 		subClassesJList.setForeground(color);
 		relationsJList.setFont(font);
 		relationsJList.setForeground(color);
+		metricsJList.setFont(font);
+		metricsJList.setForeground(color);
 
-		// chargement des informations de la classe selectionné dans les panels
-		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnée
-		methodPane.setViewportView(methodsJList); // ajout des méthodes de la classe selectionnée
-		subClassPane.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnée
-		relationPane.setViewportView(relationsJList); // ajout des relations de la classe selectionnée
+		// chargement des informations de la classe selectionnÃ© dans les panels
+		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnÃ©e
+		methodPane.setViewportView(methodsJList); // ajout des mÃ©thodes de la classe selectionnÃ©e
+		subClassPane.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnÃ©e
+		relationPane.setViewportView(relationsJList); // ajout des relations de la classe selectionnÃ©e
 
 		textDetails.setFont(font);
 		textDetails.setEditable(false);
 		textDetails.setText(selectedClass.getName().getDetail());
 		textDetails.setForeground(color);
-		detailPane.setViewportView(textDetails); // détails BNF de Classe
+		detailPane.setViewportView(textDetails); // dÃ©tails BNF de Classe
 
 	}
 	
 	/**
-	 * Chaque clic sur un élement affiche son détail BNF associé dans la partie Détails
-	 * @param panel  panel cible du lien d'écoute
+	 * Chaque clic sur un Ã©lement affiche son dÃ©tail BNF associÃ© dans la partie DÃ©tails
+	 * @param panel  panel cible du lien d'Ã©coute
 	 */
 	public void addListenerToShowDetails(JScrollPane panel) {
 		JViewport viewport = panel.getViewport(); 
@@ -370,6 +377,7 @@ public class Parseur extends javax.swing.JFrame {
 		relationPane = new JScrollPane();
 		detailPane = new JScrollPane();
 		textDetails = new JTextArea(5, 8);
+		metricsPane = new JScrollPane();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setUndecorated(true);
@@ -444,24 +452,31 @@ public class Parseur extends javax.swing.JFrame {
 		jPanelFile.setLayout(jPanelFileLayout);
 		jPanelFileLayout.setHorizontalGroup(jPanelFileLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(jPanelFileLayout.createSequentialGroup().addGap(38, 38, 38)
-						.addComponent(loadFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 175,
-								javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-						.addComponent(filename, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(closeButton,
-								javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)));
-		jPanelFileLayout.setVerticalGroup(jPanelFileLayout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(jPanelFileLayout.createSequentialGroup().addGap(15, 15, 15)
-						.addGroup(jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-								.addComponent(loadFileButton).addComponent(filename,
-										javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE,
-										javax.swing.GroupLayout.PREFERRED_SIZE))
-						.addContainerGap(21, Short.MAX_VALUE))
-				.addGroup(jPanelFileLayout.createSequentialGroup().addContainerGap().addComponent(closeButton,
-						javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addContainerGap()));
+				.addGroup(jPanelFileLayout.createSequentialGroup()
+                                        .addGap(38, 38, 38)
+					.addComponent(loadFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 175,javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addGap(68, 68, 68)
+					.addComponent(filename, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                );
+		jPanelFileLayout.setVerticalGroup(
+                    jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelFileLayout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelFileLayout.createSequentialGroup()
+                            .addGap(12, 12, 12)
+                            .addComponent(filename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(loadFileButton)))
+                .addGap(21, 21, 21))
+            .addGroup(jPanelFileLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(closeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
 		// AUTRES BOX
 		jPanelInfo.setBackground(new java.awt.Color(255, 255, 255));
@@ -470,7 +485,9 @@ public class Parseur extends javax.swing.JFrame {
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
-		methodPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Méthodes",
+                metricsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "MÃ©triques", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
+
+		methodPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "MÃ©thodes",
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
@@ -478,7 +495,7 @@ public class Parseur extends javax.swing.JFrame {
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
-		relationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Associations/agrégations",
+		relationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Associations/agrÃ©gations",
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
@@ -486,40 +503,50 @@ public class Parseur extends javax.swing.JFrame {
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP,
 				new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
-		javax.swing.GroupLayout jPanelInfoLayout = new javax.swing.GroupLayout(jPanelInfo);
-		jPanelInfo.setLayout(jPanelInfoLayout);
-		jPanelInfoLayout
-				.setHorizontalGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addGroup(jPanelInfoLayout.createSequentialGroup()
-								.addGroup(jPanelInfoLayout
-										.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-										.addGroup(jPanelInfoLayout.createSequentialGroup().addGroup(jPanelInfoLayout
-												.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-												.addComponent(subClassPane).addComponent(attributePane,
-														javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE))
-												.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-												.addGroup(jPanelInfoLayout
-														.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-														.addComponent(methodPane).addComponent(relationPane)))
-										.addComponent(detailPane))
-								.addContainerGap()));
-		jPanelInfoLayout.setVerticalGroup(jPanelInfoLayout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(jPanelInfoLayout.createSequentialGroup().addContainerGap()
-						.addGroup(
-								jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-										.addComponent(attributePane, javax.swing.GroupLayout.DEFAULT_SIZE, 276,
-												Short.MAX_VALUE)
-										.addComponent(methodPane))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
-								javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-								.addComponent(subClassPane, javax.swing.GroupLayout.PREFERRED_SIZE, 106,
-										javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addComponent(relationPane))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(detailPane,
-								javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)));
+		metricsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "MÃ©triques", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Menlo", 1, 18), new java.awt.Color(33, 63, 86))); // NOI18N
 
+
+		javax.swing.GroupLayout jPanelInfoLayout = new javax.swing.GroupLayout(jPanelInfo);
+        jPanelInfo.setLayout(jPanelInfoLayout);
+        jPanelInfoLayout.setHorizontalGroup(
+            jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelInfoLayout.createSequentialGroup()
+                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(detailPane, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelInfoLayout.createSequentialGroup()
+                        .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(subClassPane)
+                            .addComponent(attributePane, javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(methodPane, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+                            .addComponent(relationPane))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(metricsPane,javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        
+		jPanelInfoLayout.setVerticalGroup(
+            jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelInfoLayout.createSequentialGroup()
+                        .addComponent(metricsPane)
+                        .addContainerGap())
+                    .addGroup(jPanelInfoLayout.createSequentialGroup()
+                        .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(attributePane, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
+                            .addComponent(methodPane, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(subClassPane, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(relationPane))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(detailPane, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))))
+        );
+                
+                
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
