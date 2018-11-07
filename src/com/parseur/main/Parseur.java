@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -82,6 +83,9 @@ public class Parseur extends javax.swing.JFrame {
 				// calcul des métriques
 				database.computeAllMetrics();
 				
+				/*String csvFile = "/Users/Jonathan/Desktop/test.csv";
+				FileWriter writer = new FileWriter(csvFile);
+				database.generateCSVFileForMetrics(writer);*/
 				// base de données construite : on l'affiche dans la JFrame Parseur
 				afficherDansJPanel();
 

@@ -45,9 +45,9 @@ public class Classe {
 		metrics.updateMetrics(data);
 	}
 	
-	/**Concat�ne les relations de la Classe dans une seule cha�ne de caract�res
-	 * @param	value   informations li�es � la relation
-	 * @param	detail  grammaire BNF qui d�crit la relation
+	/**Concatene les relations de la Classe dans une seule chaine de caracteres
+	 * @param	value   informations liees a la relation
+	 * @param	detail  grammaire BNF qui decrit la relation
 	 */
 	public void addRelation(String value, String detail) {
 		String oldValue = relations.getValue();
@@ -103,7 +103,11 @@ public class Classe {
 		return listModel; 
 	}
 	
-	public DefaultListModel<String> getMetrics() { 
+	public MetricsData getMetrics() {
+		return this.metrics;
+	}
+	
+	public DefaultListModel<String> getListModelMetrics() { 
 		DefaultListModel<String> listModel = new DefaultListModel<String>();	
 		Map<String, String> metricsDict = metrics.getDict();
 		
@@ -116,7 +120,7 @@ public class Classe {
 	}
 
 	/**
-	 * Calcule les m�triques d'une classe donn�e
+	 * Calcule les metriques d'une classe donnee
 	 * @param classes
 	 */
 	
@@ -126,7 +130,7 @@ public class Classe {
 }
 
 /**
- * Permet de cr�er un objet regroupant une valeur (nom, attributs..) avec sa description BNF
+ * Permet de creer un objet regroupant une valeur (nom, attributs..) avec sa description BNF
  */
 class StringDetail {
 	private String value;
@@ -135,7 +139,7 @@ class StringDetail {
 	/**
 	 * Regroupe deux valeurs de type String
 	 * @param	value   information
-	 * @param	detail  grammaire BNF qui d�crit l'information � extraire
+	 * @param	detail  grammaire BNF qui decrit l'information a extraire
 	 */
 	public StringDetail(String value, String detail) {
 		this.value = value;

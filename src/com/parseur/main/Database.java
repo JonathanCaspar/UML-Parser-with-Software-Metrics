@@ -1,6 +1,11 @@
 package com.parseur.main;
 
+import java.awt.List;
+import java.io.Writer;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -237,6 +242,37 @@ public class Database {
 				currentClass.setMetrics(data);
 				System.out.println(currentClass.getMetrics());
 			}
+		}
+	}
+	
+	public void generateCSVFileForMetrics(Writer w) {
+		try {
+			//Impression du header
+			ArrayList<String> header = new ArrayList<String>();
+			header.add("Classe");
+			for (MetricNames metricNames : MetricNames.values()) {
+				header.add(metricNames.name());
+			}
+			CSVGenerator.writeLine(w, header);
+			
+			//Impression des infos de toutes les classes
+			for (Classe c : classes) {
+				ArrayList<String> data = new ArrayList<String>();
+				
+				data.add(c.getName().getValue()); // Nom de la classe
+				Map<String, String> allMetrics = c.getMetrics().getDict();
+				
+				for (MetricNames metric : MetricNames.values()) {
+					data.add(allMetrics.get(metric.name()));
+				}
+				
+				CSVGenerator.writeLine(w, data);
+			}
+			w.flush();
+	        w.close();
+			
+		} catch (Exception e) {
+			System.out.println("Error while generating CSV File : " + e.toString());
 		}
 	}
 

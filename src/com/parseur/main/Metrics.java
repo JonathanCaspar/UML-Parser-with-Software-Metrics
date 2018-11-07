@@ -1,7 +1,9 @@
 package com.parseur.main;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,8 +13,8 @@ import javax.xml.crypto.Data;
 
 public class Metrics {	
 	private ArrayList<Classe> classes;
-
-	private Pattern parenthesis = Pattern.compile("[\\w\\s]+\\(([\\w\\,\\s]+)+\\)");
+	private Pattern parenthesis = Pattern.compile("[\\w\\s]+\\(([\\w\\,\\s]+)+\\)"); // détecte tout ce qui se trouve entre parenthèses
+	private static String[] metricsDefinition;
 
 	public Metrics (ArrayList<Classe> classes) {
 		this.classes = classes;
@@ -363,7 +365,9 @@ public class Metrics {
 	 */
 	public String[] computeMetricsOf(Classe currentClass) {
 		Classe c = currentClass; // on stocke la classe actuelle dans Metrics pour qu'elle soit accessible par toutes les méthodes "ComputeXXX"
-		DecimalFormat df = new DecimalFormat("#.##");
+		DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
+		otherSymbols.setDecimalSeparator('.'); 
+		DecimalFormat df = new DecimalFormat("#.##", otherSymbols);
 		
 		String[] result = {df.format(computeANA(c)),
 						   String.valueOf(computeNOM(c, null, null)),
