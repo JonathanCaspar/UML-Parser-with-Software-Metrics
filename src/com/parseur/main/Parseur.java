@@ -36,7 +36,7 @@ import javax.swing.filechooser.FileSystemView;
 public class Parseur extends javax.swing.JFrame {
 
 	public Database database;
-	public File file;
+	private File file;
 
 	private JLabel closeButton;
 	private JButton loadFileButton;
@@ -58,40 +58,16 @@ public class Parseur extends javax.swing.JFrame {
 	private JTextArea textDetails;
 	private JTextField filename;
 	
+	private boolean metricsComputed;
+	private boolean fileLoaded;
 	private String selectedClass;
 
 	public Parseur() {
 
 		initComponents();
 		database = new Database();
-
-		//Pour charger directement Ã  l'ouverture ---- POUR DEBUGGER SEULEMENT
-		/*file = new File("./Ligue.ucd");
-		if (file != null) {
-			filename.setText(file.getName());
-			filename.setEditable(false);
-			try {
-				// reintialisation des donnees aprÃ¨s chaque chargement de fichier
-				database.resetDB();
-				jPanelClass.removeAll();
-				String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
-				// decoupage des instructions separees par ";" (classe, generalisation, relations)
-				String[] tab = fileStrings.split("\\;");
-				for (int j = 0; j < tab.length; j++) {
-					// analyse le type d'instruction puis la traite
-					findAndTreatType(tab[j]);
-				}
-				
-				// calcul des metriques
-				database.computeAllMetrics();
-				
-				// base de données construite : on l'affiche dans la JFrame Parseur
-				afficherDansJPanel();
-			} catch (IOException ex) {
-				System.out.println("Could not read file");
-			}
-		}*/
-		// ---------------
+		metricsComputed = false;
+		fileLoaded = false;
 		
 		loadFileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -104,6 +80,9 @@ public class Parseur extends javax.swing.JFrame {
 						// reintialisation des donnees apres chaque chargement de fichier
 						database.resetDB();
 						jPanelClass.removeAll();
+						selectedClass = "";
+						metricsComputed = false;
+						fileLoaded = false;
 
 						String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
@@ -114,9 +93,6 @@ public class Parseur extends javax.swing.JFrame {
 							// analyse le type d'instruction puis la traite
 							findAndTreatType(tab[j]);
 						}
-						
-						// calcul des metriques
-						database.computeAllMetrics();
 						
 						// base de donnees construite : on l'affiche dans la JFrame Parseur
 						afficherDansJPanel();
@@ -141,6 +117,7 @@ public class Parseur extends javax.swing.JFrame {
 	 * @throws IOException erreur de lecture
 	 */
 	public String readFile(String path, Charset encoding) throws IOException {
+		fileLoaded = true;
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);
 	}
@@ -270,8 +247,8 @@ public class Parseur extends javax.swing.JFrame {
 					l.repaint();
 					
 					metricsButton.addMouseListener(new java.awt.event.MouseAdapter() {
-						public void mouseClicked(java.awt.event.MouseEvent evt) {
-							calculerMetrics(classeActuel);
+						public void mouseReleased(java.awt.event.MouseEvent evt) {
+							if(!metricsComputed) afficherMetrics(classeActuel); 
 						}
 					});
 					
@@ -320,6 +297,8 @@ public class Parseur extends javax.swing.JFrame {
 		listModel = selectedClass.getRelations();
 		relationsJList = new JList<StringDetail>(listModel);
 		listModelMetrics = selectedClass.getListModelMetrics();
+		metricsJList = new JList<String>(listModelMetrics);
+		
 
 		attributesJList.setFont(font);
 		attributesJList.setForeground(color);
@@ -329,6 +308,15 @@ public class Parseur extends javax.swing.JFrame {
 		subClassesJList.setForeground(color);
 		relationsJList.setFont(font);
 		relationsJList.setForeground(color);
+		metricsJList.setFont(font);
+		metricsJList.setForeground(color);
+		
+		// On affiche les métriques associées au classe uniquement si l'utilisateur ait préalablement demandé à les calculer
+		if(metricsComputed) {
+			metricsPane.setViewportView(metricsJList);
+		}else {
+			metricsPane.setViewportView(null);
+		}
 
 		// chargement des informations de la classe selectionne dans les panels
 		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnee
@@ -369,6 +357,7 @@ public class Parseur extends javax.swing.JFrame {
 	public void addMetricListener(JScrollPane panel) {
 		JViewport viewport = panel.getViewport(); 
 		JList<String> list = (JList<String>) viewport.getView(); 
+		if(list == null) return; // Les métriques non pas encore été calculés, on ne mets pas de liens d'écoute
 
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -418,8 +407,11 @@ public class Parseur extends javax.swing.JFrame {
 		}
 	}
 	
-	public void calculerMetrics(Classe selectedClass){
-		if (selectedClass != null){
+	public void afficherMetrics(Classe selectedClass){
+		if (fileLoaded){
+			database.computeAllMetrics();
+			metricsComputed = true;
+			// On rafraichit l'affichage des métriques de la classe en cours
 			JList<String> metricsJList;
 			DefaultListModel<String> listModelMetrics;
  			listModelMetrics = selectedClass.getListModelMetrics();
@@ -429,12 +421,14 @@ public class Parseur extends javax.swing.JFrame {
  			metricsJList.setFont(font);
 			metricsJList.setForeground(color);
  			metricsPane.setViewportView(metricsJList);
+ 			
+ 			
  		} else {
-			JOptionPane.showMessageDialog(this,
-					    "Vous devez d'abord sélectionner une classe avant de pouvoir calculer les métriques.",
-					    "Absence de classe sélectionnée",
-					    JOptionPane.WARNING_MESSAGE);
-		}
+ 			JOptionPane.showMessageDialog(this,
+				    "Vous devez d'abord charger un fichier à l'aide du bouton 'Charger fichier' pour calculer des métriques.",
+				    "Aucun fichier .ucd chargé",
+				    JOptionPane.WARNING_MESSAGE);
+ 		}
 	}
 
 	/** 

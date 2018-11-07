@@ -233,16 +233,14 @@ public class Database {
 		}
 		
 		for (int i = 0; i < classes.size(); i++) {				
-			Classe currentClass = classes.get(i);
-			System.out.println(currentClass + " : ");
+			Classe selectedClass = classes.get(i);
 			
 			// Calcule les metriques de currentClass
-			String[] data = metrics.computeMetricsOf(currentClass);
+			String[] data = metrics.computeMetricsOf(selectedClass);
 			
 			if (data != null) {
 				// Actualise les metriques de currentClass
-				currentClass.setMetrics(data);
-				System.out.println(currentClass.getMetrics());
+				selectedClass.setMetrics(data);
 			}
 		}
 	}
