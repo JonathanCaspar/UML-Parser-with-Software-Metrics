@@ -17,9 +17,11 @@ import javax.swing.filechooser.FileSystemView;
 public class Parseur extends javax.swing.JFrame {
 
 	public Database database;
+	public File file;
 
 	private JLabel closeButton;
 	private JButton loadFileButton;
+	private JButton cvsButton;
 
 	private JLabel jLabel_Classe;
 	private JPanel jPanelInfo;
@@ -42,7 +44,7 @@ public class Parseur extends javax.swing.JFrame {
 		database = new Database();
 
 		//Pour charger directement à l'ouverture ---- POUR DEBUGGER SEULEMENT
-		File file = new File("./Ligue.ucd");
+		/*file = new File("./Ligue.ucd");
 		if (file != null) {
 			filename.setText(file.getName());
 			filename.setEditable(false);
@@ -72,12 +74,12 @@ public class Parseur extends javax.swing.JFrame {
 			} catch (IOException ex) {
 				System.out.println("Could not read file");
 			}
-		}
+		}*/
 		// ---------------
 		
 		loadFileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				File file = searchFile();
+				file = searchFile();
 				if (file != null) {
 					filename.setText(file.getName());
 					filename.setEditable(false);
@@ -341,6 +343,17 @@ public class Parseur extends javax.swing.JFrame {
 		System.exit(0);
 	}
 
+	public void produceCSV(){
+		if(file != null){
+			System.out.println("produire CSV");
+		} else {
+			JOptionPane.showMessageDialog(this,
+					    "Vous devez d'abord sélectionner un fichier avant de pouvoir produire le fichier CSV correspondant.",
+					    "Absence de fichier sélectionné",
+					    JOptionPane.WARNING_MESSAGE);
+		}
+	}
+
 	/** 
 	 * Initialise les elements de l'interface
 	 */ 
@@ -353,6 +366,7 @@ public class Parseur extends javax.swing.JFrame {
 		loadFileButton = new JButton();
 		filename = new JTextField();
 		closeButton = new JLabel();
+		cvsButton = new JButton();
 		jPanelInfo = new JPanel();
 		attributePane = new JScrollPane();
 		methodPane = new JScrollPane();
@@ -431,34 +445,44 @@ public class Parseur extends javax.swing.JFrame {
 			}
 		});
 
+		cvsButton.setFont(new java.awt.Font("Menlo", 0, 13)); // NOI18N
+        cvsButton.setText("Produire CVS");
+        cvsButton.addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				produceCSV();
+			}
+		});
+
 		javax.swing.GroupLayout jPanelFileLayout = new javax.swing.GroupLayout(jPanelFile);
 		jPanelFile.setLayout(jPanelFileLayout);
 		jPanelFileLayout.setHorizontalGroup(jPanelFileLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGroup(jPanelFileLayout.createSequentialGroup()
-                                        .addGap(38, 38, 38)
+                    .addGap(38, 38, 38)
 					.addComponent(loadFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 175,javax.swing.GroupLayout.PREFERRED_SIZE)
 					.addGap(68, 68, 68)
 					.addComponent(filename, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                );
+					.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 113, Short.MAX_VALUE)
+                    .addComponent(cvsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                	.addGap(18, 18, 18)
+                	.addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
 		jPanelFileLayout.setVerticalGroup(
-                    jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelFileLayout.createSequentialGroup()
-                        .addGap(15, 15, 15)
-                        .addGroup(jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelFileLayout.createSequentialGroup()
-                            .addGap(12, 12, 12)
-                            .addComponent(filename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(loadFileButton)))
-                .addGap(21, 21, 21))
+            jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelFileLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(closeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(jPanelFileLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(cvsButton)
+                    .addGroup(jPanelFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanelFileLayout.createSequentialGroup()
+                            .addGap(12, 12, 12)
+                            .addComponent(filename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(loadFileButton)))
+                .addGap(21, 21, 21))
         );
 
 		// AUTRES BOX
