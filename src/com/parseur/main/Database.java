@@ -1,10 +1,7 @@
 package com.parseur.main;
 
-import java.awt.List;
 import java.io.Writer;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,9 +17,9 @@ public class Database {
 	}
 
 	/** 
-	 * Ajoute un objet Classe avec ses attributs et méthodes extraites d'une instruction, dans la structure de données interne (si celui-ci n'existe pas déjà) 
-	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
-	 * @return	l'erreur trouvée si elle existe
+	 * Ajoute un objet Classe avec ses attributs et methodes extraites d'une instruction, dans la structure de donnees interne (si celui-ci n'existe pas deja) 
+	 * @param	instruction  sequence de caracteres suivant une grammaire BNF decrivant un modele UML
+	 * @return	l'erreur trouvee si elle existe
 	 */
 	public String addClass(String instruction) {
 		Pattern attrPattern = Pattern.compile("(ATTRIBUTES)[\\w|\\s|\\:|\\,]+(?=OPERATIONS)");
@@ -40,7 +37,7 @@ public class Database {
 
 			// Parsing des attributs
 			if (attrMatcher.find()) {
-				// On récupére les attributs dans un tableau
+				// On recupere les attributs dans un tableau
 				String rawAttributes = instruction.substring(attrMatcher.start(), attrMatcher.end()).trim();
 				if (rawAttributes.length() < 12) {
 					newClass.setAttributes("", "");
@@ -52,7 +49,7 @@ public class Database {
 					String formattedAttributes = "";
 	
 					for (int i = 0; i < attrList.length; i++) {
-						// On affecte chaque attribut étant sous la forme "<nom> : <type>" dans la partie
+						// On affecte chaque attribut etant sous la forme "<nom> : <type>" dans la partie
 						// attributs de "newClass" sous une nouvelle forme : "<type> <nom>,"
 						String[] attribut = attrList[i].trim().split("\\:");
 						formattedAttributes += (attribut[1].trim() + " " + attribut[0].trim()
@@ -62,9 +59,9 @@ public class Database {
 				}
 			}
 
-			// Parsing de l'ensemble des méthodes
+			// Parsing de l'ensemble des methodes
 			if (operationMatcher.find()) {
-				// On récupére les méthodes dans un tableau
+				// On recupere les methodes dans un tableau
 				String rawMethods = instruction.substring(operationMatcher.start(), operationMatcher.end()).trim();
 				
 				if (rawMethods.length() > 11) {
@@ -73,13 +70,13 @@ public class Database {
 					Matcher methodMatcher = methodPattern.matcher(methods);
 					String formattedMethods = "";
 	 
-					// On parse chaque méthode <nom>(<parametres>): <type>
+					// On parse chaque methode <nom>(<parametres>): <type>
 					while (methodMatcher.find()) {
 						String[] parameters = methodMatcher.group(2).split("\\,");
-						String type = methodMatcher.group(3); // type de retour de la méthode
+						String type = methodMatcher.group(3); // type de retour de la methode
 						formattedMethods += ((type.equals("void") ? "" : type + " ") + methodMatcher.group(1) + "("); // <type> <nom de methode>
 	
-						// On traite les parametres multiples de la méthode
+						// On traite les parametres multiples de la methode
 						int count = parameters.length;
 						if (count != 0) {
 							for (int i = 0; i < count; i++) {
@@ -101,28 +98,28 @@ public class Database {
 				}
 			}
 
-			// Une fois le nom, les attributs et les méthodes ajoutées, on ajoute la Classe
+			// Une fois le nom, les attributs et les methodes ajoutees, on ajoute la Classe
 			// dans notre ArrayList classes
 			classes.add(newClass);
 			return "";
 		} else
-			return "Erreur : La classe " + className + " a été trouvé plusieurs fois.\n"
-					+ "Seules les informations de la première occurence de " + className + " seront enregistrées.";
+			return "Erreur : La classe " + className + " a ete trouve plusieurs fois.\n"
+					+ "Seules les informations de la premiere occurence de " + className + " seront enregistrees.";
 	}
 
 	/** 
-	 * Ajoute à la super classe concernée (Classe) des sous-classes étant donné une instruction, dans la structure de données interne 
-	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 * Ajoute a la super classe concernee (Classe) des sous-classes etant donne une instruction, dans la structure de donnees interne 
+	 * @param	instruction  sequence de caracteres suivant une grammaire BNF decrivant un modele UML
 	 */
 	public void addGeneralization(String instruction) {
 		Pattern generaPattern = Pattern.compile("(?:GENERALIZATION\\s+)([\\w]+)(?:\\s+SUBCLASSES\\s+)([\\w|\\,|\\s]+)");
 		Matcher generaMatcher = generaPattern.matcher(instruction);
 
-		if (generaMatcher.find() && (generaMatcher.group(2) != null)) { // si au moins 1 sous-classe est spécifiée
-			// on vérifie si la super classe indiquée existe
+		if (generaMatcher.find() && (generaMatcher.group(2) != null)) { // si au moins 1 sous-classe est specifiee
+			// on verifie si la super classe indiquee existe
 			Classe superClasse = classExists(classes, generaMatcher.group(1));
 			if (superClasse != null) {
-				// on vérifie que chaque sous-classe existe sinon on ne la considère pas
+				// on verifie que chaque sous-classe existe sinon on ne la considere pas
 				String[] subClasses = generaMatcher.group(2).split("\\,");
 				String formattedSubClasses = "";
 
@@ -140,8 +137,8 @@ public class Database {
 	}
 
 	/** 
-	 * Modifie deux objets Classe pour respectivement mettre à jour leurs associations étant donné une instruction, dans la structure de données interne 
-	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 * Modifie deux objets Classe pour respectivement mettre a jour leurs associations etant donne une instruction, dans la structure de donnees interne 
+	 * @param	instruction  sequence de caracteres suivant une grammaire BNF decrivant un modele UML
 	 */
 	public void addAssociation(String instruction) {
 		Pattern relationPattern = Pattern.compile(
@@ -156,7 +153,7 @@ public class Database {
 			Classe class1 = classExists(classes, className1);
 			Classe class2 = classExists(classes, className2);
 
-			// on vérifie que les deux classes existes sinon la relation est impossible
+			// on verifie que les deux classes existes sinon la relation est impossible
 			if ((class1 != null) && (class2 != null)) {
 				class1.addRelation("(R) " + relationName, instruction);
 				class2.addRelation("(R) " + relationName, instruction);
@@ -165,8 +162,8 @@ public class Database {
 	}
 
 	/** 
-	 * Modifie deux objets Classe pour respectivement mettre à jour leurs relations d'aggregation étant donné une instruction, dans la structure de données interne 
-	 * @param	instruction  séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 * Modifie deux objets Classe pour respectivement mettre a jour leurs relations d'aggregation etant donne une instruction, dans la structure de donnees interne 
+	 * @param	instruction  sequence de caracteres suivant une grammaire BNF decrivant un modele UML
 	 */
 	public void addAggregation(String instruction) {
 		Pattern aggregationPattern = Pattern
@@ -179,14 +176,14 @@ public class Database {
 			Classe containerClass = classExists(classes, containerClassName);
 
 			if (containerClass != null) {
-				// on récupere les "parts"
+				// on recupere les "parts"
 				String[] splitParts = aggregationMatcher.group(2).trim().split("\\,");
 
 				for (int i = 0; i < splitParts.length; i++) {
 					Matcher partExtractMatcher = partExtractPattern.matcher(splitParts[i].trim());
 
 					if (partExtractMatcher.find()) {
-						// on vérifie si la classe trouvée existe
+						// on verifie si la classe trouvee existe
 						String partClassName = partExtractMatcher.group(1).trim();
 						Classe partClass = classExists(classes, partClassName);
 
@@ -201,9 +198,9 @@ public class Database {
 	}
 
 	/**
-	 * Vérifie l'existence d'un objet de type Classe (identifié par son nom) dans la structure de données interne
-	 * @param	searchedClass  nom de la classe à rechercher
-	 * @return	la référence de la Classe cherchée si elle existe
+	 * Verifie l'existence d'un objet de type Classe (identifie par son nom) dans la structure de donnees interne
+	 * @param	searchedClass  nom de la classe a rechercher
+	 * @return	la reference de la Classe cherchee si elle existe
 	 */
 	public static Classe classExists(ArrayList<Classe> classes, String searchedClass) {
 		for (int i = 0; i < classes.size(); i++) {
@@ -215,10 +212,10 @@ public class Database {
 	}
 
 	/**
-	 * Forme une liste de toutes les classes enregistrées étant graphiquement modélisable dans un JList
-	 * @return	la liste des classes enregistrées
+	 * Forme une liste de toutes les classes enregistrees etant graphiquement modelisable dans un JList
+	 * @return	la liste des classes enregistrees
 	 */
-	// Retourne une ArrayList d'objet StringDetail détaillant le nom des classes
+	// Retourne une ArrayList d'objet StringDetail detaillant le nom des classes
 	public DefaultListModel<Classe> getClasses() {
 		DefaultListModel<Classe> listModel = new DefaultListModel<Classe>();
 		for (int i = 0; i < classes.size(); i++) {
@@ -228,7 +225,7 @@ public class Database {
 	}
 	
 	/**
-	 * Calcule et associe à chaque classe les métriques encapsulées dans un objet MetricsData
+	 * Calcule et associe a chaque classe les metriques encapsulees dans un objet MetricsData
 	 */
 	public void computeAllMetrics() {
 		if (this.metrics == null) {
@@ -239,17 +236,21 @@ public class Database {
 			Classe currentClass = classes.get(i);
 			System.out.println(currentClass + " : ");
 			
-			// Calcule les métriques de currentClass
+			// Calcule les metriques de currentClass
 			String[] data = metrics.computeMetricsOf(currentClass);
 			
 			if (data != null) {
-				// Actualise les métriques de currentClass
+				// Actualise les metriques de currentClass
 				currentClass.setMetrics(data);
 				System.out.println(currentClass.getMetrics());
 			}
 		}
 	}
 	
+	/**
+	 * Genere un fichier .csv contenant un tableau des metriques calculees pour un diagramme UML
+	 * @param w Fichier dans lequel on veut exporter les donnes de metriques
+	 */
 	public void generateCSVFileForMetrics(Writer w) {
 		try {
 			//Impression du header
@@ -282,7 +283,7 @@ public class Database {
 	}
 
 	/**
-	 * Réinitialise la base de données et supprime les classes enregistrées
+	 * Reinitialise la base de donnees et supprime les classes enregistrees
 	 */
 	public void resetDB() {
 		classes.clear();

@@ -1,7 +1,5 @@
 package com.parseur.main;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -103,6 +101,9 @@ public class Classe {
 		return listModel; 
 	}
 	
+	/**
+	 * @return le MetricData de l'objet Classe
+	 */
 	public MetricsData getMetrics() {
 		return this.metrics;
 	}

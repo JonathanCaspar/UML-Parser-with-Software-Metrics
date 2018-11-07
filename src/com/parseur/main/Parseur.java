@@ -1,7 +1,13 @@
 package com.parseur.main;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,7 +16,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.*;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileSystemView;
@@ -53,13 +71,13 @@ public class Parseur extends javax.swing.JFrame {
 			filename.setEditable(false);
 
 			try {
-				// réintialisation des données après chaque chargement de fichier
+				// reintialisation des donnees après chaque chargement de fichier
 				database.resetDB();
 				jPanelClass.removeAll();
 
 				String fileStrings = readFile(file.toPath().toString(), Charset.forName("UTF-8"));
 
-				// decoupage des instructions séparées par ";" (classe, generalisation, relations)
+				// decoupage des instructions separees par ";" (classe, generalisation, relations)
 				String[] tab = fileStrings.split("\\;");
 
 				for (int j = 0; j < tab.length; j++) {
@@ -67,7 +85,7 @@ public class Parseur extends javax.swing.JFrame {
 					findAndTreatType(tab[j]);
 				}
 				
-				// calcul des métriques
+				// calcul des metriques
 				database.computeAllMetrics();
 				
 				// base de donn�es construite : on l'affiche dans la JFrame Parseur
@@ -106,7 +124,7 @@ public class Parseur extends javax.swing.JFrame {
 						// calcul des metriques
 						database.computeAllMetrics();
 						
-						// base de données construite : on l'affiche dans la JFrame Parseur
+						// base de donnees construite : on l'affiche dans la JFrame Parseur
 						afficherDansJPanel();
 
 
@@ -135,7 +153,7 @@ public class Parseur extends javax.swing.JFrame {
 
 	/** 
 	 * Cherche un fichier dans l'ordinateur
-	 * @return le fichier selectionné
+	 * @return le fichier selectionne
 	 */
 	public File searchFile() {
 		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
@@ -162,8 +180,8 @@ public class Parseur extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Détecte le type d'une instruction (attributs, méthodes, relations ...) en grammaire BNF et fait le traitement adéquat
-	 * @param instruction	séquence de caractères suivant une grammaire BNF décrivant un modèle UML
+	 * Detecte le type d'une instruction (attributs, methodes, relations ...) en grammaire BNF et fait le traitement adequat
+	 * @param instruction	sequence de caractères suivant une grammaire BNF decrivant un modèle UML
 	 */
 	public void findAndTreatType(String instruction) {
 		Pattern patternClass = Pattern.compile("CLASS\\s\\w+\\s+ATTRIBUTES\\s+(\\w|\\:|\\,|\\(|\\)|\\s)*OPERATIONS(\\w|\\:|\\,|\\(|\\)|\\s)*");
@@ -179,7 +197,7 @@ public class Parseur extends javax.swing.JFrame {
 		if (matcherClass.find()) {
 			String result = database.addClass(matcherClass.group(0));
 			if (!result.isEmpty()) {
-				// result a retourné un string non vide donc contient un message d'erreur
+				// result a retourne un string non vide donc contient un message d'erreur
 				System.out.println(result);
 			}
 			return;
@@ -255,7 +273,7 @@ public class Parseur extends javax.swing.JFrame {
 					l.setBackground(selectedcolor);
 					l.repaint();
 					
-					// Classe selectionnée : on affiche ses détails
+					// Classe selectionnee : on affiche ses details
 					showClassInfo(classeActuel);
 					selectedClass = classeActuel.getName().getValue();
 					addListenerToShowDetails(attributePane);
@@ -289,8 +307,8 @@ public class Parseur extends javax.swing.JFrame {
 		Font font = new Font("Menlo", Font.PLAIN, 16);
 		Color color = Color.decode("#894627");
 
-		listModel = selectedClass.getAttributes(); // crée un modèle de liste d'objets StringDetail
-		attributesJList = new JList<StringDetail>(listModel); // crée une JList contenant les objets StringDetail
+		listModel = selectedClass.getAttributes(); // cree un modèle de liste d'objets StringDetail
+		attributesJList = new JList<StringDetail>(listModel); // cree une JList contenant les objets StringDetail
 																// (attributs) en utilisant le bon modele d'affichage
 																// (listModel)
 		listModel = selectedClass.getMethods();
@@ -313,25 +331,26 @@ public class Parseur extends javax.swing.JFrame {
 		metricsJList.setFont(font);
 		metricsJList.setForeground(color);
 
-		// chargement des informations de la classe selectionné dans les panels
-		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnée
-		methodPane.setViewportView(methodsJList); // ajout des méthodes de la classe selectionnée
-		subClassPane.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnée
-		relationPane.setViewportView(relationsJList); // ajout des relations de la classe selectionnée
+		// chargement des informations de la classe selectionne dans les panels
+		attributePane.setViewportView(attributesJList); // ajout des attributs de la classe selectionnee
+		methodPane.setViewportView(methodsJList); // ajout des methodes de la classe selectionnee
+		subClassPane.setViewportView(subClassesJList); // ajout des sous-classes de la classe selectionnee
+		relationPane.setViewportView(relationsJList); // ajout des relations de la classe selectionnee
 		metricsPane.setViewportView(metricsJList);
 
 		textDetails.setFont(font);
 		textDetails.setEditable(false);
 		textDetails.setText(selectedClass.getName().getDetail());
 		textDetails.setForeground(color);
-		detailPane.setViewportView(textDetails); // détails BNF de Classe
+		detailPane.setViewportView(textDetails); // details BNF de Classe
 
 	}
 	
 	/**
-	 * Chaque clic sur un element affiche son détail BNF associé dans la partie Détails
-	 * @param panel  panel cible du lien d'écoute
+	 * Chaque clic sur un element affiche son detail BNF associe dans la partie Details
+	 * @param panel  panel cible du lien d'ecoute
 	 */
+	@SuppressWarnings("unchecked")
 	public void addListenerToShowDetails(JScrollPane panel) {
 		JViewport viewport = panel.getViewport(); 
 		JList<StringDetail> list = (JList<StringDetail>) viewport.getView(); 
@@ -344,6 +363,11 @@ public class Parseur extends javax.swing.JFrame {
 		});
 	}
 	
+	/**
+	 * Chaque clic sur une m�trique affiche sa d�finition dans la partie Details
+	 * @param panel  panel cible du lien d'ecoute
+	 */
+	@SuppressWarnings("unchecked")
 	public void addMetricListener(JScrollPane panel) {
 		JViewport viewport = panel.getViewport(); 
 		JList<String> list = (JList<String>) viewport.getView(); 

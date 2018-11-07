@@ -11,17 +11,17 @@ import javax.swing.DefaultListModel;
 
 public class Metrics {	
 	private ArrayList<Classe> classes;
-	private Pattern parenthesis = Pattern.compile("[\\w\\s]+\\(([\\w\\,\\s]+)+\\)"); // détecte tout ce qui se trouve entre parenthèses
+	private Pattern parenthesis = Pattern.compile("[\\w\\s]+\\(([\\w\\,\\s]+)+\\)"); // detecte tout ce qui se trouve entre parenthèses
 	public static String[] metricsDefinition = {
-			"Nombre moyen d’arguments des méthodes locales pour la classe CLASSNAME.",
-			"Nombre de méthodes locales/héritées de la classe CLASSNAME. Dans le cas où une méthode est héritée et redéfinie localement "
+			"Nombre moyen d’arguments des methodes locales pour la classe CLASSNAME.",
+			"Nombre de methodes locales/heritees de la classe CLASSNAME. Dans le cas où une methode est heritee et redefinie localement "
 			+ "(même nom, même ordre et types des arguments et même type de retour), elle ne compte qu’une fois.",
-			"Nombre d’attributs locaux/hérités de la classe CLASSNAME.",
-			"Nombre de fois où d’autres classes du diagramme apparaissent comme types des arguments des méthodes de CLASSNAME.",
-			"Nombre de fois où CLASSNAME apparaît comme type des arguments dans les méthodes des autres classes du diagramme.",
-			"Nombre d’associations (incluant les agrégations) locales/héritées auxquelles participe une classe CLASSNAME.",
-			"Taille du chemin le plus long reliant une classe CLASSNAME à une classe racine dans le graphe d’héritage.",
-			"Taille du chemin le plus long reliant une classe CLASSNAME à une classe feuille dans le graphe d’héritage.",
+			"Nombre d’attributs locaux/herites de la classe CLASSNAME.",
+			"Nombre de fois où d’autres classes du diagramme apparaissent comme types des arguments des methodes de CLASSNAME.",
+			"Nombre de fois où CLASSNAME apparaît comme type des arguments dans les methodes des autres classes du diagramme.",
+			"Nombre d’associations (incluant les agregations) locales/heritees auxquelles participe une classe CLASSNAME.",
+			"Taille du chemin le plus long reliant une classe CLASSNAME à une classe racine dans le graphe d’heritage.",
+			"Taille du chemin le plus long reliant une classe CLASSNAME à une classe feuille dans le graphe d’heritage.",
 			"Nombre de sous-classes directes de CLASSNAME.",
 			"Nombre de sous-classes directes et indirectes de CLASSNAME." };
 
@@ -30,7 +30,7 @@ public class Metrics {
 	}
 	
 	/**
-	 * Nombre moyen d’arguments des méthodes locales pour la classe c
+	 * Nombre moyen d’arguments des methodes locales pour la classe c
 	 * @param c	classe initiale
 	 */
 	private float computeANA(Classe c) {		
@@ -39,9 +39,9 @@ public class Metrics {
 		int argCount = 0;
 		if(methodsCount == 0) return 0;
 		
-		// Pour chaque méthode de la classe, on inspecte chaque argument
+		// Pour chaque methode de la classe, on inspecte chaque argument
 		for(int i = 0; i < methodsCount; i++) {
-			 // Récupère tout ce qui se trouve entre parenthèses
+			 // Recupère tout ce qui se trouve entre parenthèses
 			Matcher parenMatch = parenthesis.matcher(methods.getElementAt(i).getValue());
 			if(parenMatch.find()) {
 				String methodParams = parenMatch.group(1);
@@ -55,10 +55,10 @@ public class Metrics {
 	}
 	
 	/**
-	 * Nombre de méthodes locales/héritées de la classe c
+	 * Nombre de methodes locales/heritees de la classe c
 	 * @param classeInit		classe initiale
-	 * @param visitedClasses	liste des classes déjà visitées lors du parcours récursif
-	 * @param visitedMethods	liste des méthodes déjà visitées lors du parcours récursif
+	 * @param visitedClasses	liste des classes dejà visitees lors du parcours recursif
+	 * @param visitedMethods	liste des methodes dejà visitees lors du parcours recursif
 	 */
 	private int computeNOM(Classe classeInit, ArrayList<Classe> visitedClasses, ArrayList<String> visitedMethods) {
 		DefaultListModel<StringDetail> methods = classeInit.getMethods();
@@ -67,32 +67,32 @@ public class Metrics {
 
 		int methodsCount = getSizeOfModelList(methods);
 		int argCount = 0;
-		if(!visitedClasses.contains(classeInit)) visitedClasses.add(classeInit); // évite qu'on visite à nouveau la classe courante
+		if(!visitedClasses.contains(classeInit)) visitedClasses.add(classeInit); // evite qu'on visite à nouveau la classe courante
 		
-		//On stocke la liste des méthodes de la classe courante (déjà rencontrés)
+		//On stocke la liste des methodes de la classe courante (dejà rencontres)
 		for (int i = 0; i < methodsCount; i++) {
 			String methodName = methods.getElementAt(i).getValue();
-			if(!visitedMethods.contains(methodName)) {	// la méthode n'a pas déjà été rencontrée 
-				visitedMethods.add(methodName); // on stocke chaque méthode
+			if(!visitedMethods.contains(methodName)) {	// la methode n'a pas dejà ete rencontree 
+				visitedMethods.add(methodName); // on stocke chaque methode
 				argCount++;
 			}
 		}
 		
 		// On analyse toutes les autres classes qui sont potentiellement des super-classes de la classe initiale
 		for (Classe potentialSuperClass : classes) {
-			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes déjà visitées
+			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes dejà visitees
 				DefaultListModel<StringDetail> subClassesOfSuperClass = potentialSuperClass.getSubClasses(); 
 				
-				// On vérifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
+				// On verifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
 				int subClassesOfSuperClassCount = getSizeOfModelList(subClassesOfSuperClass);
 				
 				for(int i = 0; i <  subClassesOfSuperClassCount; i++) {
-					// On récupère la référence vers la sous-classe de la potentielle super classe
+					// On recupère la reference vers la sous-classe de la potentielle super classe
 					Classe subClass = Database.classExists(classes, subClassesOfSuperClass.getElementAt(i).getValue());
 					
 					// Si la sous classe est la classe initiale, alors on est sûr que la super-classe en est une
 					if(subClass.equals(classeInit)) {
-						// On ajoute récursivement le nombre d'arguments de la super classe en question
+						// On ajoute recursivement le nombre d'arguments de la super classe en question
 						argCount += computeNOM(potentialSuperClass, visitedClasses, visitedMethods);
 					}
 				}
@@ -103,10 +103,10 @@ public class Metrics {
 	}
 
 	/**
-	 * Nombre d’attributs locaux/hérités de la classe c
+	 * Nombre d’attributs locaux/herites de la classe c
 	 * @param classeInit		classe initiale
-	 * @param visitedClasses	liste des classes déjà visitées lors du parcours récursif
-	 * @param visitedAttributes	liste des attributs déjà visités lors du parcours récursif
+	 * @param visitedClasses	liste des classes dejà visitees lors du parcours recursif
+	 * @param visitedAttributes	liste des attributs dejà visites lors du parcours recursif
 	 */
 	private int computeNOA(Classe classeInit, ArrayList<Classe> visitedClasses, ArrayList<String> visitedAttributes) {
 		DefaultListModel<StringDetail> attributes = classeInit.getAttributes();
@@ -115,27 +115,27 @@ public class Metrics {
 
 		int attributesCount = getSizeOfModelList(attributes);
 		int argCount = 0;
-		if(!visitedClasses.contains(classeInit)) visitedClasses.add(classeInit); // évite qu'on visite à nouveau la classe courante
+		if(!visitedClasses.contains(classeInit)) visitedClasses.add(classeInit); // evite qu'on visite à nouveau la classe courante
 		
-		//On stocke la liste des méthodes déjà rencontrées
+		//On stocke la liste des methodes dejà rencontrees
 		for (int i = 0; i < attributesCount; i++) {
 			String attributeName = attributes.getElementAt(i).getValue();
-			if(!visitedAttributes.contains(attributeName)) {	// la méthode n'a pas déjà été visitée 
-				visitedAttributes.add(attributeName); // on stocke chaque méthode
+			if(!visitedAttributes.contains(attributeName)) {	// la methode n'a pas dejà ete visitee 
+				visitedAttributes.add(attributeName); // on stocke chaque methode
 				argCount++;
 			}
 		}
 		
 		// On analyse toutes les autres classes qui sont potentiellement des super-classes de la classe initiale
 		for (Classe potentialSuperClass : classes) {
-			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes déjà visitées
+			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes dejà visitees
 				DefaultListModel<StringDetail> subClassesOfSuperClass = potentialSuperClass.getSubClasses(); 
 				
-				// On vérifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
+				// On verifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
 				int subClassesOfSuperClassCount = getSizeOfModelList(subClassesOfSuperClass);
 				
 				for(int i = 0; i <  subClassesOfSuperClassCount; i++) {
-					// On récupère la référence vers la sous-classe de la potentielle super classe
+					// On recupère la reference vers la sous-classe de la potentielle super classe
 					Classe subClass = Database.classExists(classes, subClassesOfSuperClass.getElementAt(i).getValue());
 					
 					// Si la sous classe est la classe initiale, alors on est sûr que la super-classe en est une
@@ -150,7 +150,7 @@ public class Metrics {
 	}
 
 	/**
-	 * Nombre de fois où d’autres classes du diagramme apparaissent comme types des arguments des méthodes de c
+	 * Nombre de fois où d’autres classes du diagramme apparaissent comme types des arguments des methodes de c
 	 * @param c		classe initiale
 	 */
 	private int computeITC(Classe c) {
@@ -161,13 +161,13 @@ public class Metrics {
 		for(int i = 0; i < methodsCount; i++) {
 			Matcher parenMatch = parenthesis.matcher(methods.getElementAt(i).getValue());
 			if(parenMatch.find()) {
-				// on récupère les types d'arguments de la méthode
+				// on recupère les types d'arguments de la methode
 				String methodParams = parenMatch.group(1);
 				
 				if(! methodParams.isEmpty()) {
 					String[] params = methodParams.split("\\,");
 					
-					// on vérifie pour chaque paramètre si une Classe du même nom existe
+					// on verifie pour chaque paramètre si une Classe du même nom existe
 					for (String param : params) {
 						Classe otherClass = Database.classExists(classes, param);
 						if(otherClass != null) { // l'argument est bien une classe
@@ -181,7 +181,7 @@ public class Metrics {
 	}
 
 	/**
-	 *  Nombre de fois où classeInit apparaît comme type des arguments dans les méthodes des autres classes du diagramme
+	 *  Nombre de fois où classeInit apparaît comme type des arguments dans les methodes des autres classes du diagramme
 	 * @param classeInit	classe initiale
 	 */
 	private int computeETC(Classe classeInit) {
@@ -197,13 +197,13 @@ public class Metrics {
 			for(int i = 0; i < methodsCount; i++) {
 				Matcher parenMatch = parenthesis.matcher(methods.getElementAt(i).getValue());
 				if(parenMatch.find()) {
-					// on récupère les types d'arguments de la méthode
+					// on recupère les types d'arguments de la methode
 					String methodParams = parenMatch.group(1);
 					
 					if(! methodParams.isEmpty()) {
 						String[] params = methodParams.split("\\,");
 						
-						// on vérifie si une Classe "classeInit" se trouve dans les paramètres de la méthode 
+						// on verifie si une Classe "classeInit" se trouve dans les paramètres de la methode 
 						for (String param : params) {
 							if(param.equals(classeInit.getName().getValue())) { // l'argument est bien une classe
 								count++;
@@ -217,10 +217,10 @@ public class Metrics {
 	}
 
 	/**
-	 * Nombre d’associations (incluant les agrégations) locales/héritées auxquelles participe une classe c
+	 * Nombre d’associations (incluant les agregations) locales/heritees auxquelles participe une classe c
 	 * @param classeInit		classe initiale
-	 * @param visitedClasses	liste des classes déjà visitées lors du parcours récursif
-	 * @param visitedRelations	liste des relations déjà visités lors du parcours récursif
+	 * @param visitedClasses	liste des classes dejà visitees lors du parcours recursif
+	 * @param visitedRelations	liste des relations dejà visites lors du parcours recursif
 	 */
 	private int computeCAC(Classe classeInit, ArrayList<Classe> visitedClasses, ArrayList<String> visitedRelations) {
 		DefaultListModel<StringDetail> relations = classeInit.getRelations();
@@ -231,10 +231,10 @@ public class Metrics {
 		int argCount = 0;
 		if(!visitedClasses.contains(classeInit)) visitedClasses.add(classeInit); // on omet l'analyse de la classe elle-même
 		
-		//On stocke la liste des relations déjà rencontrées
+		//On stocke la liste des relations dejà rencontrees
 		for (int i = 0; i < relationsCount; i++) {
 			String relationName = relations.getElementAt(i).getValue();
-			if(!visitedRelations.contains(relationName)) {	// la relation n'a pas déjà été visitée 
+			if(!visitedRelations.contains(relationName)) {	// la relation n'a pas dejà ete visitee 
 				visitedRelations.add(relationName); // on stocke chaque relation
 				argCount++;
 			}
@@ -242,14 +242,14 @@ public class Metrics {
 		
 		// On analyse toutes les autres classes qui sont potentiellement des super-classes de la classe initiale
 		for (Classe potentialSuperClass : classes) {
-			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes déjà visitées
+			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes dejà visitees
 				DefaultListModel<StringDetail> subClassesOfSuperClass = potentialSuperClass.getSubClasses(); 
 				
-				// On vérifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
+				// On verifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
 				int subClassesOfSuperClassCount = getSizeOfModelList(subClassesOfSuperClass);
 				
 				for(int i = 0; i <  subClassesOfSuperClassCount; i++) {
-					// On récupère la référence vers la sous-classe de la potentielle super classe
+					// On recupère la reference vers la sous-classe de la potentielle super classe
 					Classe subClass = Database.classExists(classes, subClassesOfSuperClass.getElementAt(i).getValue());
 					
 					// Si la potentielle super-classe possède la sous-classe initiale "c"
@@ -264,10 +264,10 @@ public class Metrics {
 	}
 
 	/**
-	 * Taille du chemin le plus long reliant une classe ci à une classe racine dans le graphe d’héritage
-	 * @param classeInit		classe initiale à partir de laquelle on fait une remontée dans l'arbre d'héritage
-	 * @param depth				profondeur de récursion lors du parcours des super-classes
-	 * @param visitedClasses	liste des classes déjà visitées lors du parcours récursif
+	 * Taille du chemin le plus long reliant une classe ci à une classe racine dans le graphe d’heritage
+	 * @param classeInit		classe initiale à partir de laquelle on fait une remontee dans l'arbre d'heritage
+	 * @param depth				profondeur de recursion lors du parcours des super-classes
+	 * @param visitedClasses	liste des classes dejà visitees lors du parcours recursif
 	 */
 	private int computeDIT(Classe classeInit, int depth, ArrayList<Classe> visitedClasses) {
 		if(visitedClasses == null) visitedClasses = new ArrayList<Classe>();
@@ -276,14 +276,14 @@ public class Metrics {
 		
 		// On analyse toutes les autres classes qui sont potentiellement des super-classes de la classe initiale
 		for (Classe potentialSuperClass : classes) {
-			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes déjà visitées
+			if(!visitedClasses.contains(potentialSuperClass)) { // on omet l'analyse des classes dejà visitees
 				DefaultListModel<StringDetail> subClassesOfSuperClass = potentialSuperClass.getSubClasses(); 
 				
-				// On vérifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
+				// On verifie si la classe initiale se trouve dans les sous-classes de nos potentielles super-classes
 				int subClassesOfSuperClassCount = getSizeOfModelList(subClassesOfSuperClass);
 				
 				for(int i = 0; i <  subClassesOfSuperClassCount; i++) {
-					// On récupère la référence vers la sous-classe de la potentielle super classe
+					// On recupère la reference vers la sous-classe de la potentielle super classe
 					Classe subClass = Database.classExists(classes, subClassesOfSuperClass.getElementAt(i).getValue());
 					
 					// Si la sous classe est la classe initiale, alors on est sûr que la super-classe en est une
@@ -298,10 +298,10 @@ public class Metrics {
 	}
 	
 	/**
-	 * Taille du chemin le plus long reliant une classe ci à une classe feuille dans le graphe d’héritage
-	 * @param c					classe initiale à partir de laquelle on fait une remontée dans l'arbre d'héritage
-	 * @param depth				profondeur de récursion lors du parcours des super-classes
-	 * @param visitedClasses	liste des classes déjà visitées lors du parcours récursif
+	 * Taille du chemin le plus long reliant une classe ci à une classe feuille dans le graphe d’heritage
+	 * @param c					classe initiale à partir de laquelle on fait une remontee dans l'arbre d'heritage
+	 * @param depth				profondeur de recursion lors du parcours des super-classes
+	 * @param visitedClasses	liste des classes dejà visitees lors du parcours recursif
 	 */
 	private int computeCLD(Classe c, int depth, ArrayList<Classe> visitedClasses) {
 		if(visitedClasses == null) visitedClasses = new ArrayList<Classe>();
@@ -310,11 +310,11 @@ public class Metrics {
 
 		visitedClasses.add(c);
 		
-		// Pour toutes les sous-classes de la classe courante : on cherche un chemin permettant de descendre dans l'arbre d'héritage
+		// Pour toutes les sous-classes de la classe courante : on cherche un chemin permettant de descendre dans l'arbre d'heritage
 		for (int i = 0; i < count; i++) {
 			String className = subClassesString.getElementAt(i).getValue();
 			Classe subClass = Database.classExists(classes, className);
-			if (subClass != null && !visitedClasses.contains(subClass)) { // la classe existe et n'a pas déjà été visitée, on possède la référence à cette derniere
+			if (subClass != null && !visitedClasses.contains(subClass)) { // la classe existe et n'a pas dejà ete visitee, on possède la reference à cette derniere
 				return computeCLD(subClass, depth+1, visitedClasses); // on cherche si on peut descendre d'une profondeur de plus
 			}
 		}	
@@ -335,7 +335,7 @@ public class Metrics {
 	/**
 	 *  Nombre de sous-classes directes et indirectes de c
 	 *  @param c				classe initiale
-	 *  @param visitedClasse	liste des classes déjà visitées lors du parcours récursif
+	 *  @param visitedClasse	liste des classes dejà visitees lors du parcours recursif
 	 */
 	private int computeNOD(Classe c, ArrayList<Classe> visitedClasses) {  // nombre de sous-classes directs et indirects
 		if(visitedClasses == null) visitedClasses = new ArrayList<Classe>();
@@ -347,7 +347,7 @@ public class Metrics {
 		if(count > 0){
 			for (int i = 0; i < limit; i++) {
 				Classe subClass = Database.classExists(classes, subClassesString.getElementAt(i).getValue());
-				if (subClass != null && !visitedClasses.contains(subClass)) { // la classe existe et n'a pas déjà été visitée, on possède la référence à cette derniere
+				if (subClass != null && !visitedClasses.contains(subClass)) { // la classe existe et n'a pas dejà ete visitee, on possède la reference à cette derniere
 					count += computeNOD(subClass, visitedClasses);
 				}
 			}	
@@ -358,7 +358,7 @@ public class Metrics {
 	/**
 	 * Calcule la taille d'une liste de type DefaultListModel
 	 * @param list
-	 * @return le nombre d'éléments contenus dans une DefaultListModel
+	 * @return le nombre d'elements contenus dans une DefaultListModel
 	 */
 	public int getSizeOfModelList(DefaultListModel<StringDetail> list) {
 		if( list.firstElement().getValue().length() != 0){  
@@ -368,12 +368,12 @@ public class Metrics {
 	}
 
 	/**
-	 * Calcule les métriques du classe donnéee
+	 * Calcule les metriques du classe donnee
 	 * @param currentClass
-	 * @return	un tableau contenant chaque métrique
+	 * @return	un tableau contenant chaque metrique
 	 */
 	public String[] computeMetricsOf(Classe currentClass) {
-		Classe c = currentClass; // on stocke la classe actuelle dans Metrics pour qu'elle soit accessible par toutes les méthodes "ComputeXXX"
+		Classe c = currentClass; // on stocke la classe actuelle dans Metrics pour qu'elle soit accessible par toutes les methodes "ComputeXXX"
 		DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
 		otherSymbols.setDecimalSeparator('.'); 
 		DecimalFormat df = new DecimalFormat("#.##", otherSymbols);

@@ -16,7 +16,10 @@ public class MetricsData {
 	    }
 	}
 	
-	// Modifie les metriques stockees dans "allMetrics"
+	/**
+	 * Modifie les metriques stockees dans "allMetrics"
+	 * @param args	liste des métriques dans l'ordre
+	 */
 	public void updateMetrics(String[] args) {
 		MetricNames[] metricNames = MetricNames.values();
 		
